@@ -229,7 +229,13 @@ func (Solution) Part01(input string) string {
 }
 
 func walkPath(path []*Vertex) {
-	// ...
+	for i := 0; i < len(path)-1; i++ {
+		a, b := path[i], path[i+1]
+		edgeAB := a.edges[slices.IndexFunc(a.edges, func(edge *Edge) bool {
+			return edge.a == b || edge.b == b
+		})]
+		edgeAB.weight += 1
+	}
 }
 
 func (Solution) Part02(input string) string {
