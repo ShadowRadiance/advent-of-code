@@ -13,6 +13,9 @@ Metrics/MethodLength:
 Metrics/ModuleLength:
   CountAsOne: [ "array", "hash", "heredoc", "method_call" ]
 
+RSpec/ExampleLength:
+  CountAsOne: [ "array", "hash", "heredoc", "method_call" ]
+
 Style/Documentation:
   Enabled: false
 Style/Lambda:
