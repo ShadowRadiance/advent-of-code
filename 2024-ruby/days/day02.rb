@@ -12,7 +12,8 @@ module Days
     end
 
     def part_b
-      "PENDING-B"
+      reports = parse_input
+      reports.count { |r| safe_with_problem_dampener?(r) }.to_s
     end
 
     def safe?(report)
@@ -28,6 +29,21 @@ module Days
       end
 
       true
+    end
+
+    def safe_with_problem_dampener?(report)
+      # Problem Dampener allows one bad level
+      # eg: [1 3 2 4 5] is unsafe (reversed direction)
+      #     but if you skip the second level [1 2 4 5] is safe
+      return true if safe?(report)
+
+      report.length.times do |idx|
+        new_report = report.dup
+        new_report.delete_at(idx)
+        return true if safe?(new_report)
+      end
+
+      false
     end
 
     def violates_direction?(a, b, initial) # rubocop:disable Naming/MethodParameterName
