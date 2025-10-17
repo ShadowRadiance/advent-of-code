@@ -23,6 +23,10 @@ RSpec.describe "Days::Day03" do
 
   describe "#part_b" do
     context "with the sample data" do
+      let(:puzzle_input) do
+        "xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))"
+      end
+
       it "returns the correct value for part B" do
         expect(day_runner.part_b).to eq "48"
       end
