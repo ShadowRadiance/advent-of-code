@@ -7,7 +7,16 @@ module Days
     end
 
     def part_a
-      "PENDING-A"
+      left, right = parse_input
+
+      left.sort!
+      right.sort!
+
+      differences = left.map.with_index do |lval, idx|
+        (lval - right[idx]).abs
+      end
+
+      differences.sum.to_s
     end
 
     def part_b
