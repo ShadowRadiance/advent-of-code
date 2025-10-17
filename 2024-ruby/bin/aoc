@@ -1,0 +1,26 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require_relative "../support/aoc"
+
+# parse ARGV for params
+# bin/aoc       => run all
+# bin/aoc 14    => run all of day 14
+# bin/aoc 14 a  => run part a of day 14 only
+
+day, part = ARGV
+
+raise "Invalid Part" unless [nil, "a", "b"].include?(part)
+raise "Invalid Day" unless day.nil? || (1..25).cover?(day.to_i)
+
+aoc = AOC.new(base_path: File.dirname(__dir__))
+
+result = if day.nil?
+           aoc.run_all
+         elsif part.nil?
+           aoc.run_day(day)
+         else
+           aoc.run_part(day, part)
+         end
+
+puts result
