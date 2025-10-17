@@ -20,7 +20,29 @@ module Days
     end
 
     def part_b
-      "PENDING-B"
+      left, right = parse_input
+
+      similarity_scores = left.map do |lval|
+        lval * right.count(lval)
+      end
+
+      similarity_scores.sum.to_s
     end
+
+    def parse_input
+      left = []
+      right = []
+
+      puzzle_input.lines.each do |line|
+        a, b = line.split(/\s+/)
+        left << a.to_i
+        right << b.to_i
+      end
+      [left, right]
+    end
+
+    private
+
+    attr_reader :puzzle_input
   end
 end
