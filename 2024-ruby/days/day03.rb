@@ -28,8 +28,18 @@ module Days
     def part_b
       instructions = puzzle_input.scan(RX_GOOD_MUL_WITH_TOGGLES)
                                  .map { |e| e.compact.first }
-      # [["mul(2,4)", nil, nil], [nil, nil, "don't()"], ["mul(5,5)", nil, nil], ["mul(11,8)", nil, nil], [nil, "do()", nil], ["mul(8,5)", nil, nil]]
-      # ["mul(2,4)", "don't()", "mul(5,5)", "mul(11,8)", "do()", "mul(8,5)"]
+      # scan ==> [["mul(2,4)", nil, nil],
+      #           [nil, nil, "don't()"],
+      #           ["mul(5,5)", nil, nil],
+      #           ["mul(11,8)", nil, nil],
+      #           [nil, "do()", nil],
+      #           ["mul(8,5)", nil, nil]]
+      # map  ==> ["mul(2,4)",
+      #           "don't()",
+      #            "mul(5,5)",
+      #            "mul(11,8)",
+      #            "do()",
+      #            "mul(8,5)"]
 
       # start in DO mode
       # iterate over result
