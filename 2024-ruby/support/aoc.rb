@@ -49,7 +49,7 @@ class AOC
 
   def require_day_runner(day)
     day_runner_definition_file = File.join(base_path, "days", "day#{padded(day)}.rb")
-    require day_runner_definition_file if File.exist?(day_runner_definition_file)
+    require_relative day_runner_definition_file if File.exist?(day_runner_definition_file)
   end
 
   def input_data(day)
