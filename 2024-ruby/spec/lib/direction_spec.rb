@@ -19,4 +19,34 @@ RSpec.describe "Direction" do
       )
     end
   end
+
+  describe ".rotate90right" do
+    it "rotates the direction clockwise" do
+      [
+        { initial: :north, rotated: :east },
+        { initial: :east, rotated: :south },
+        { initial: :south, rotated: :west },
+        { initial: :west, rotated: :north },
+      ].each do |h|
+        initial = Direction.compass_directions[h[:initial]]
+        rotated = Direction.compass_directions[h[:rotated]]
+        expect(initial.rotate90right).to eq(rotated)
+      end
+    end
+  end
+
+  describe ".rotate90left" do
+    it "rotates the direction anticlockwise" do
+      [
+        { initial: :north, rotated: :west },
+        { initial: :west, rotated: :south },
+        { initial: :south, rotated: :east },
+        { initial: :east, rotated: :north },
+      ].each do |h|
+        initial = Direction.compass_directions[h[:initial]]
+        rotated = Direction.compass_directions[h[:rotated]]
+        expect(initial.rotate90left).to eq(rotated)
+      end
+    end
+  end
 end
