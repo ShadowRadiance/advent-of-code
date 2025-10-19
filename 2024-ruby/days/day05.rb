@@ -22,7 +22,15 @@ module Days
     end
 
     def part_b
-      "PENDING-B"
+      # fix and score the incorrectly ordered updates
+
+      updates = parse_input[:updates]
+      rules = parse_input[:rules]
+
+      updates.filter { !update_correctly_ordered?(it, rules) }
+             .map { fix_update_ordering(it, rules) }
+             .map { update_score(it) }
+             .sum.to_s
     end
 
     def update_score(update)
@@ -49,6 +57,20 @@ module Days
       later_index = update.find_index(rule[:later])
 
       earlier_index > later_index
+    end
+
+    def fix_update_ordering(update, rules)
+      applicable_rules = rules.filter { rule_applies?(update, it) }
+
+      ruleset = {}
+      applicable_rules.each do |rule|
+        ruleset[rule[:earlier]] ||= []
+        ruleset[rule[:earlier]] << rule[:later]
+      end
+
+      update.sort do |a, b|
+        ruleset[a]&.include?(b) ? -1 : 1
+      end
     end
 
     # ---
