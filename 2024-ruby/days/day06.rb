@@ -82,28 +82,35 @@ module Days
       end.first
     end
 
-    # returns true if we walk out and false if we loop
-    def record_guard_walk(guard, map) # rubocop:disable Metrics/MethodLength,Naming/PredicateMethod
+    # returns :out if we walk out and :loop if we loop
+    def record_guard_walk(guard, map) # rubocop:disable Metrics/MethodLength
       seen = {}
 
       while guard.location.in_bounds?(map.bounds)
-        return false if seen[[guard.location, guard.direction]]
+        return :loop if seen[[guard.location, guard.direction]]
 
         seen[[guard.location, guard.direction]] = true
         map.set_char_at_loc(guard.location, "X")
 
-        if map.char_at_loc(guard.location + guard.direction) == "#"
+        if %w[# O].include?(map.char_at_loc(guard.location + guard.direction))
           guard.turn_right
         else
           guard.move_forward
         end
       end
 
-      true
+      :out
     end
 
     def count_guarded_locations(map)
       map.count_chars("X")
+    end
+
+    def run_simulation_with_obstacle(loc)
+      new_map = Map.new(parse_input)
+      new_map.set_char_at_loc(loc, "O")
+      guard = initialize_guard(new_map)
+      record_guard_walk(guard, new_map)
     end
 
     # ---
@@ -121,7 +128,24 @@ module Days
     end
 
     def part_b
-      "PENDING-B"
+      # allow placing an extra obstacle
+      # - how many locations cause a loop
+      list = []
+
+      map = Map.new(parse_input)
+      map.num_rows.times do |y|
+        map.num_cols.times do |x|
+          puts "Checking location x: #{x}, y: #{y}"
+
+          obstacle_loc = Location.new(x: x, y: y)
+          next unless map.char_at_loc(obstacle_loc) == "."
+
+          list << obstacle_loc if run_simulation_with_obstacle(obstacle_loc) == :loop
+        end
+      end
+      list.length.to_s
+
+      # YIKES 6m44s!
     end
 
     private
