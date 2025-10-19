@@ -13,7 +13,7 @@ RSpec.describe "Location" do
     )
   end
 
-  describe ".in_bounds" do
+  describe ".in_bounds?" do
     it "returns true for locations that are within bounds" do
       (-1..2).each do |x|
         (-3..4).each do |y|
