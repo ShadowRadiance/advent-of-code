@@ -46,7 +46,7 @@ RSpec.describe Days::Day07 do
 
     describe "#part_b" do
       it "returns the correct value for part B" do
-        expect(day_runner.part_b).to eq "PENDING-B"
+        expect(day_runner.part_b).to eq "11387"
       end
     end
   end
@@ -54,7 +54,11 @@ RSpec.describe Days::Day07 do
   describe Days::Day07::Calibration do
     [
       {
-        calibration: described_class.new(total: 3267, operands: [81, 40, 27]),
+        calibration: described_class.new(
+          3267,
+          [81, 40, 27],
+          %i[+ *],
+        ),
         operations: [
           [81, :+, 40, :+, 27],
           [81, :+, 40, :*, 27],
@@ -63,7 +67,11 @@ RSpec.describe Days::Day07 do
         ],
       },
       {
-        calibration: described_class.new(total: 190, operands: [10, 19]),
+        calibration: described_class.new(
+          190,
+          [10, 19],
+          %i[+ *],
+        ),
         operations: [
           [10, :+, 19],
           [10, :*, 19],

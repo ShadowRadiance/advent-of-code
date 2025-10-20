@@ -7,3 +7,5 @@ gem "rspec"
 gem "rspec-pride"
 gem "rubocop"
 gem "rubocop-rspec"
+
+gem "debug"
