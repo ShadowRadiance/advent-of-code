@@ -4,34 +4,34 @@ require_relative "vector"
 
 class Direction < Vector
   def self.compass_directions
-    @compass_directions ||= {
-      north: Direction.new(x: +0, y: -1),
-      north_east: Direction.new(x: +1, y: -1),
-      east: Direction.new(x: +1, y: +0),
-      south_east: Direction.new(x: +1, y: +1),
-      south: Direction.new(x: +0, y: +1),
-      south_west: Direction.new(x: -1, y: +1),
-      west: Direction.new(x: -1, y: +0),
-      north_west: Direction.new(x: -1, y: -1),
+    {
+      north: north,
+      north_east: north_east,
+      east: east,
+      south_east: south_east,
+      south: south,
+      south_west: south_west,
+      west: west,
+      north_west: north_west,
     }
   end
 
   def self.from_char(char)
     case char
-    when "^" then compass_directions[:north]
-    when ">" then compass_directions[:east]
-    when "v" then compass_directions[:south]
-    when "<" then compass_directions[:west]
+    when "^" then Direction.north
+    when ">" then Direction.east
+    when "v" then Direction.south
+    when "<" then Direction.west
     else raise "Unknown direction"
     end
   end
 
   def to_c
-    case self
-    when compass_directions[:north] then "^"
-    when compass_directions[:east] then ">"
-    when compass_directions[:south] then "v"
-    when compass_directions[:west] then "<"
+    case itself
+    when Direction.north then "^"
+    when Direction.east then ">"
+    when Direction.south then "v"
+    when Direction.west then "<"
     else raise "Unknown direction"
     end
   end
@@ -42,5 +42,37 @@ class Direction < Vector
 
   def rotate90left
     Direction.new(x: y, y: -x)
+  end
+
+  def self.north
+    @north ||= Direction.new(x: +0, y: -1)
+  end
+
+  def self.north_east
+    @north_east ||= Direction.new(x: +1, y: -1)
+  end
+
+  def self.east
+    @east ||= Direction.new(x: +1, y: +0)
+  end
+
+  def self.south_east
+    @south_east ||= Direction.new(x: +1, y: +1)
+  end
+
+  def self.south
+    @south ||= Direction.new(x: +0, y: +1)
+  end
+
+  def self.south_west
+    @south_west ||= Direction.new(x: -1, y: +1)
+  end
+
+  def self.west
+    @west ||= Direction.new(x: -1, y: +0)
+  end
+
+  def self.north_west
+    @north_west ||= Direction.new(x: -1, y: -1)
   end
 end
