@@ -6,4 +6,8 @@ class Location < Vector
   def in_bounds?(bounds)
     bounds.cover?(x: x, y: y)
   end
+
+  def inspect
+    "L(#{x},#{y})"
+  end
 end

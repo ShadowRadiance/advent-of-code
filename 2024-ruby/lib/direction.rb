@@ -3,6 +3,10 @@
 require_relative "vector"
 
 class Direction < Vector
+  def inspect
+    "D(#{x},#{y})"
+  end
+
   def self.compass_directions
     {
       north: north,
