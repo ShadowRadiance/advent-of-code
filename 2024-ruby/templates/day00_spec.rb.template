@@ -5,7 +5,10 @@ require_relative "../../days/day00"
 RSpec.describe "Days::Day00" do
   let(:day_runner) { Days::Day00.new(puzzle_input) }
 
-  let(:puzzle_input) { "" }
+  let(:puzzle_input) do
+    <<~INPUT
+    INPUT
+  end
 
   describe "#part_a" do
     context "with the sample data" do
