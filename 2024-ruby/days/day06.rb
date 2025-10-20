@@ -69,6 +69,12 @@ module Days
       end
     end
 
+    PathEntry = Data.define(:location, :direction) do
+      def inspect
+        "<#{location.x},#{location.y},#{direction.to_c}>"
+      end
+    end
+
     def parse_input
       puzzle_input.lines(chomp: true).map(&:chars)
     end
@@ -102,8 +108,6 @@ module Days
       :out
     end
 
-    PathEntry = Data.define(:location, :direction)
-
     # returns :out if we walk out and :loop if we loop, along with the path
     def guard_walk_path(guard, map) # rubocop:disable Metrics/MethodLength
       seen = {}
@@ -130,26 +134,220 @@ module Days
       map.count_chars("X")
     end
 
-    def run_simulation_with_obstacle(loc)
-      new_map = Map.new(parse_input)
-      new_map.set_char_at_loc(loc, "O")
-      guard = initialize_guard(new_map)
-      record_guard_walk(guard, new_map)
+    class PartB < Day06
+      def run_simulation_with_obstacle(loc)
+        new_map = Map.new(parse_input)
+        new_map.set_char_at_loc(loc, "O")
+        guard = initialize_guard(new_map)
+        record_guard_walk(guard, new_map)
+      end
     end
 
-    def run_simulation_with_obstacle_and_original_path(loc, orig_path)
-      new_map = Map.new(parse_input)
-      new_map.set_char_at_loc(loc, "O")
+    class BruteForce < PartB
+      def solve
+        # allow placing an extra obstacle
+        # - how many locations cause a loop
+        list = []
 
-      # find first location of new obstactle along original path, then step back one
-      obstacle_index = orig_path.find_index { it.location == loc }
-      previous_index = obstacle_index - 1
-      path_entry = orig_path[previous_index]
+        map = Map.new(parse_input)
+        map.num_rows.times do |y|
+          map.num_cols.times do |x|
+            obstacle_loc = Location.new(x: x, y: y)
+            next unless map.char_at_loc(obstacle_loc) == "."
 
-      guard = Guard.new(path_entry.location, path_entry.direction)
+            list << obstacle_loc if run_simulation_with_obstacle(obstacle_loc) == :loop
+          end
+        end
+        list.length.to_s
 
-      # does it loop?
-      record_guard_walk(guard, new_map)
+        # YIKES 6m44s! but got the job done correctly (1946)
+      end
+    end
+
+    class WalkedLineOnly < PartB
+      def solve
+        map = Map.new(parse_input)
+        guard = initialize_guard(map)
+        result, path = guard_walk_path(guard, map)
+        raise "THAT SHOULDN'T HAPPEN" if result == :loop
+
+        obstacle_locations = path.map(&:location)
+        # remove duplicates
+        obstacle_locations = obstacle_locations.uniq
+        # remove the initial guard location
+        obstacle_locations = obstacle_locations[1..]
+
+        # reduces places to check from 10*10=100 down to 41 in test data
+        # reduces places to check from 130*130=16900 down to 5444 in live data
+
+        obstacle_locations.filter { run_simulation_with_obstacle(it) == :loop }
+                          .length.to_s
+
+        # 1946 in 1m49s
+      end
+    end
+
+    class WalkedLineOnlyWithOriginalPathData < PartB
+      def solve
+        map = Map.new(parse_input)
+        guard = initialize_guard(map)
+        result, path = guard_walk_path(guard, map)
+        raise "THAT SHOULDN'T HAPPEN" if result == :loop
+
+        obstacle_locations = path.map(&:location)
+        # remove duplicates
+        obstacle_locations = obstacle_locations.uniq
+        # remove the initial guard location
+        obstacle_locations = obstacle_locations[1..]
+
+        # reduces simulation length by remembering the path up to the obstacle
+
+        obstacle_locations.filter { run_simulation_with_obstacle_and_original_path(it, path) == :loop }
+                          .length.to_s
+
+        # 1946 in 39s
+      end
+
+      private
+
+      def run_simulation_with_obstacle_and_original_path(loc, orig_path)
+        new_map = Map.new(parse_input)
+        new_map.set_char_at_loc(loc, "O")
+
+        # find first location of new obstactle along original path, then step back one
+        obstacle_index = orig_path.find_index { it.location == loc }
+        previous_index = obstacle_index - 1
+        path_entry = orig_path[previous_index]
+
+        guard = Guard.new(path_entry.location, path_entry.direction)
+
+        # does it loop?
+        record_guard_walk(guard, new_map)
+      end
+    end
+
+    class StateTransitionsVersion < Day06
+      def solve
+        map = Map.new(parse_input)
+        state_transitions = build_state_transitions(map)
+        guard = initialize_guard(map)
+        path_entry_for_guard = PathEntry.new(guard.location, guard.direction)
+        original_guard_path = get_full_path(state_transitions, path_entry_for_guard)
+
+        solve_with_obstacles(original_guard_path, state_transitions).sum.to_s
+
+        # 1946 in 26s -- not phenomenal but better
+      end
+
+      private
+
+      def solve_with_obstacles(original_guard_path, state_transitions)
+        obstacle_locations = original_guard_path
+                             .filter { it != :exit }
+                             .map(&:location)
+                             .uniq
+                             .[](1..)
+
+        obstacle_locations.map do |obstacle_location|
+          new_state_transitions = update_state_transitions_for_obstacle(
+            state_transitions.dup,
+            obstacle_location,
+          )
+
+          # start the guard at the position right before the obstacle_location
+          obstacle_index = original_guard_path.find_index { it.location == obstacle_location }
+          previous_index = obstacle_index - 1
+          new_path_entry_for_guard = original_guard_path[previous_index]
+
+          path_loops?(new_state_transitions, new_path_entry_for_guard) ? 1 : 0
+        end
+      end
+
+      def build_state_transitions(map)
+        result = {}
+        map.num_rows.times do |y|
+          map.num_cols.times do |x|
+            [north, east, south, west].each do |dir|
+              path_entry = PathEntry.new(Location.new(x: x, y: y), dir)
+              result[path_entry] = build_state_transition(path_entry, map)
+            end
+          end
+        end
+        result
+      end
+
+      def build_state_transition(path_entry, map) # rubocop:disable Metrics/MethodLength
+        loc = path_entry.location
+        dir = path_entry.direction
+        potential_new_loc = loc + dir
+        if %w[# O].include?(map.char_at_loc(potential_new_loc))
+          dir = dir.rotate90right
+        else
+          loc = potential_new_loc
+        end
+
+        new_path_entry = PathEntry.new(loc, dir)
+        if new_path_entry.location.in_bounds?(map.bounds)
+          new_path_entry
+        else
+          :exit
+        end
+      end
+
+      def update_state_transitions_for_obstacle(state_transitions, obstacle_location)
+        [
+          PathEntry.new(location: obstacle_location + north, direction: south),
+          PathEntry.new(location: obstacle_location + south, direction: north),
+          PathEntry.new(location: obstacle_location + east, direction: west),
+          PathEntry.new(location: obstacle_location + west, direction: east),
+        ].each do |pe|
+          update_state_transition_at_pe_for_obstacle(pe, state_transitions)
+        end
+
+        state_transitions
+      end
+
+      def update_state_transition_at_pe_for_obstacle(path_entry, state_transitions)
+        return unless state_transitions[path_entry]
+
+        state_transitions[path_entry] =
+          PathEntry.new(path_entry.location, path_entry.direction.rotate90right)
+      end
+
+      def get_full_path(state_transitions, path_entry_for_guard)
+        result = []
+        current_entry = path_entry_for_guard
+
+        loop do
+          break if current_entry.nil?
+
+          current_entry = :loop if result.include?(current_entry)
+          result << current_entry
+          current_entry = state_transitions[current_entry]
+        end
+
+        result
+      end
+
+      def path_loops?(state_transitions, path_entry_for_guard)
+        seen = Set.new
+        current_entry = path_entry_for_guard
+
+        until seen.include?(current_entry)
+          return false if current_entry == :exit
+
+          seen << current_entry
+
+          current_entry = state_transitions[current_entry]
+        end
+
+        true
+      end
+
+      def north = Direction.north
+      def south = Direction.south
+      def west = Direction.west
+      def east = Direction.east
     end
 
     # ---
@@ -167,70 +365,22 @@ module Days
     end
 
     def part_b
-      part_b_walked_line_only_using_original_path_data
+      # solver = BruteForce.new(puzzle_input)
+      # solver.solve # 6m44s!
+      # solver = WalkedLineOnly.new(puzzle_input)
+      # solver.solve # 1m49s
+      # solver = WalkedLineOnlyWithOriginalPathData.new(puzzle_input)
+      # solver.solve # 39s
+      solver = StateTransitionsVersion.new(puzzle_input)
+      solver.solve # 26s
+
+      # Possibilities for improvement
+      # - reduce copying
+      # - reduce object (re-)creation
+      # - store just the obstacles in a set/hash instead of using a grid of chars
     end
 
     private
-
-    def part_b_brute_force
-      # allow placing an extra obstacle
-      # - how many locations cause a loop
-      list = []
-
-      map = Map.new(parse_input)
-      map.num_rows.times do |y|
-        map.num_cols.times do |x|
-          obstacle_loc = Location.new(x: x, y: y)
-          next unless map.char_at_loc(obstacle_loc) == "."
-
-          list << obstacle_loc if run_simulation_with_obstacle(obstacle_loc) == :loop
-        end
-      end
-      list.length.to_s
-
-      # YIKES 6m44s! but got the job done correctly (1946)
-    end
-
-    def part_b_walked_line_only
-      map = Map.new(parse_input)
-      guard = initialize_guard(map)
-      result, path = guard_walk_path(guard, map)
-      raise "THAT SHOULDN'T HAPPEN" if result == :loop
-
-      obstacle_locations = path.map(&:location)
-      # remove duplicates
-      obstacle_locations = obstacle_locations.uniq
-      # remove the initial guard location
-      obstacle_locations = obstacle_locations[1..]
-
-      # reduces places to check from 10*10=100 down to 41 in test data
-      # reduces places to check from 130*130=16900 down to 5444 in live data
-
-      obstacle_locations.filter { run_simulation_with_obstacle(it) == :loop }
-                        .length.to_s
-
-      # 1946 in 1m49s
-    end
-
-    def part_b_walked_line_only_using_original_path_data
-      map = Map.new(parse_input)
-      guard = initialize_guard(map)
-      result, path = guard_walk_path(guard, map)
-      raise "THAT SHOULDN'T HAPPEN" if result == :loop
-
-      obstacle_locations = path.map(&:location)
-      # remove duplicates
-      obstacle_locations = obstacle_locations.uniq
-      # remove the initial guard location
-      obstacle_locations = obstacle_locations[1..]
-
-      # reduces simulation length by remembering the path up to the obstacle
-
-      obstacle_locations.filter { run_simulation_with_obstacle_and_original_path(it, path) == :loop }
-                        .length.to_s
-
-      # 1946 in 39s
-    end
 
     attr_reader :puzzle_input
   end
