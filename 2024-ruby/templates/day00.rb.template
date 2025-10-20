@@ -7,11 +7,11 @@ module Days
     end
 
     def part_a
-      "PENDING-A"
+      "PENDING_A"
     end
 
     def part_b
-      "PENDING-B"
+      "PENDING_B"
     end
 
     private
