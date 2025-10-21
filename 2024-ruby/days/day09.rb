@@ -6,18 +6,22 @@ module Days
       @puzzle_input = puzzle_input
     end
 
-    class MoveFileBlocks
-      attr_reader :blocks
-
+    class StrategyBase
       def initialize(blocks)
         @blocks = blocks
       end
 
+      attr_reader :blocks
+    end
+
+    class MoveFileBlocks < StrategyBase
       def compact
         space_blocks_count = blocks.count { it == "." }
         correct_first_space_index = blocks.length - space_blocks_count
 
         loop do
+          # constantly scanning through the blocks *from the start* each time
+          # through the loops is inefficient
           first_space_index = blocks.index(".")
           break if first_space_index == correct_first_space_index
 
@@ -30,13 +34,7 @@ module Days
       end
     end
 
-    class MoveWholeFiles
-      attr_reader :blocks
-
-      def initialize(blocks)
-        @blocks = blocks
-      end
-
+    class MoveWholeFiles < StrategyBase
       def compact
         last_file_block = blocks.rindex { it != "." }
         last_file_id = blocks[last_file_block].to_i
@@ -84,6 +82,24 @@ module Days
       end
     end
 
+    class MoveFileBlocksSmarter < StrategyBase
+      def compact # rubocop:disable Metrics/MethodLength
+        left = 0
+        right = blocks.length - 1
+        while left < right
+          if blocks[left] == "." && blocks[right] != "."
+            blocks[left], blocks[right] = blocks[right], blocks[left]
+            left += 1
+            right -= 1
+            next
+          end
+          left += 1 if blocks[left] != "."
+          right -= 1 if blocks[right] == "."
+        end
+      end
+    end
+
+
     class DiskMap
       def initialize(representation, strategy: MoveFileBlocks)
         @representation = representation
@@ -123,10 +139,14 @@ module Days
     end
 
     def part_a
-      DiskMap.new(puzzle_input)
+      # DiskMap.new(puzzle_input, strategy: MoveFileBlocks)
+      #        .compact
+      #        .checksum.to_s
+      # 6346871685398 in 1m39s YIKES!
+      DiskMap.new(puzzle_input, strategy: MoveFileBlocksSmarter)
              .compact
              .checksum.to_s
-      # 6346871685398 in 1m39s YIKES!
+      # 6346871685398 instantaneous
     end
 
     def part_b
