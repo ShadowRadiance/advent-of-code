@@ -36,7 +36,7 @@ module Days
 
     class MoveWholeFiles < StrategyBase
       def compact
-        last_file_block = blocks.rindex { it != "." }
+        last_file_block = blocks.rindex { it != "." }       # scan
         last_file_id = blocks[last_file_block].to_i
         last_file_id.downto(0) do |file_id|
           try_move_file(file_id)
@@ -44,17 +44,13 @@ module Days
       end
 
       def try_move_file(file_id)
-        start_of_file = blocks.index(file_id)
-        end_of_file = blocks.rindex(file_id)
+        start_of_file = blocks.index(file_id)               # scan
+        end_of_file = blocks.rindex(file_id)                # scan
 
         return if start_of_file.nil?
 
         file_size = end_of_file - start_of_file + 1
         target = find_space(file_size, before: start_of_file)
-
-        movable = target || "NOMOVE"
-        puts "#{file_id}: [#{start_of_file}+#{file_size}] -->#{movable}"
-
         return if target.nil?
 
         move_file(file_id, start_of_file, file_size, target)
@@ -99,6 +95,21 @@ module Days
       end
     end
 
+    File = Data.define(:index, :size, :id)
+    Free = Data.define(:index, :size)
+    class MoveWholeFilesSmarter < StrategyBase
+      def compact
+        # keep list of files, ordered by id
+        # keep list of free spaces (bucketed by size), ordered by lowest index
+        # so when looking for the earliest place to put a file of size N
+        #   we look in FreeList[N][0], then in FreeList[N+1], etc
+        #   remembering we can't move files later, only earlier
+        # when we move a File,
+        #   the Free we move into will shrink (and move lists)
+        #   the Frees directly before and after the old File location will combine (and move lists)
+        # building the FreeList and FileList requires the puzzle input instead of the blocks
+      end
+    end
 
     class DiskMap
       def initialize(representation, strategy: MoveFileBlocks)
