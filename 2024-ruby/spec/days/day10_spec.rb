@@ -7,13 +7,20 @@ RSpec.describe "Days::Day10" do
 
   let(:puzzle_input) do
     <<~INPUT
-      placeholder
+      89010123
+      78121874
+      87430965
+      96549874
+      45678903
+      32019012
+      01329801
+      10456732
     INPUT
   end
 
   describe "#part_a" do
     it "returns the correct value for part A" do
-      expect(day_runner.part_a).to eq "PENDING_A"
+      expect(day_runner.part_a).to eq "36"
     end
   end
 
