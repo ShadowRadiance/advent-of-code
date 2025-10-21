@@ -188,7 +188,6 @@ module Days
       end
 
       def build_lists # rubocop:disable Metrics/MethodLength
-        puts
         next_is_space = false
         idx = 0
         file_id = 0
