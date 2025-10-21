@@ -157,15 +157,9 @@ module Days
             @disk_map.blocks[file.index + idx] = file.id
           end
         end
-
-        # puts @disk_map.blocks.join
-        # puts @file_list.join(" ")
-        # puts @free_list
       end
 
       def move(file, to:)
-        puts "MOVING ID#{file.id} from #{file.index} to #{to.index}"
-
         file.index = to.index
 
         @free_list[to.size].delete(to)
@@ -177,7 +171,7 @@ module Days
         @free_list[to.size].sort_by!(&:index)
       end
 
-      def find_free(length, before:)
+      def find_free(length, before:) # rubocop:disable Metrics/CyclomaticComplexity
         return nil if @free_list.keys.max < length
 
         best_free = nil
