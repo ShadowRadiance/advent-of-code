@@ -7,13 +7,17 @@ require_relative "../lib/grid"
 module Days
   class Day10
     class SolutionA
-      Trail = Data.define(:location, :set_of_nines) do
+      Trail = Data.define(:location, :nines, :paths) do
         def inspect
-          "#{location}S#{set_of_nines.size}"
+          "#{location}S#{nines.size}"
         end
 
         def score
-          set_of_nines.size
+          nines.size
+        end
+
+        def rating
+          paths.size
         end
       end
 
@@ -25,11 +29,12 @@ module Days
         parse_locations
       end
 
-      def news
-        @news ||= [north, east, west, south]
+      def directions
+        @directions ||= [north, east, west, south]
       end
 
       def solve
+        # score: number of nines reached by trailhead (trails[0])
         follow_nines_down
 
         trails[0].map(&:score).sum.to_s
@@ -45,24 +50,31 @@ module Days
         # trail0s => all the 0s next to a trail2, remember which 9s from the 2s
         # trailheads => all the 0s next to a trail1, remember which 9s from the 1s
 
-        trails[9] = locations[9].map { |loc| Trail.new(loc, [loc].to_set) }
+        trails[9] = locations[9].map { |loc| Trail.new(loc, [loc].to_set, [[loc]].to_set) }
 
         8.downto(0) do |height|
           trails[height] = locations[height].map { |loc| trail_for(loc, height) }
         end
       end
 
-      def trail_for(loc, height)
-        set = Set.new
-        news.each { |dir| set += nines_for(loc + dir, height) }
-        Trail.new(loc, set)
-      end
+      def trail_for(loc, height) # rubocop:disable Metrics/AbcSize
+        nines = Set.new
+        paths_to_the_top = Set.new
 
-      def nines_for(loc, height)
-        step_up_idx = locations[height + 1].index(loc)
-        return Set.new if step_up_idx.nil?
+        # for each direction
+        #   if the loc+dir is in the locations[height+1]
+        #     add one path to the top for each path in trails[height + 1][step_up_idx].paths
+        #     by taking the path and appending this loc to it
+        #     (the paths will be reversed but meh)
 
-        trails[height + 1][step_up_idx].set_of_nines
+        directions.each do |dir|
+          step_up_idx = locations[height + 1].index(loc + dir)
+          next if step_up_idx.nil?
+
+          nines += trails[height + 1][step_up_idx].nines
+          paths_to_the_top += trails[height + 1][step_up_idx].paths.map { |path| path + [loc] }
+        end
+        Trail.new(loc, nines, paths_to_the_top)
       end
 
       def parse_locations
@@ -82,6 +94,15 @@ module Days
       attr_reader :grid, :matrix, :locations, :trails
     end
 
+    class SolutionB < SolutionA
+      def solve
+        follow_nines_down
+
+        # rating: number of distinct trails which begin at that trailhead
+        trails[0].map(&:rating).sum.to_s
+      end
+    end
+
     def initialize(puzzle_input)
       @puzzle_input = puzzle_input
     end
@@ -91,7 +112,7 @@ module Days
     end
 
     def part_b
-      "PENDING_B"
+      SolutionB.new(puzzle_input).solve
     end
 
     private
