@@ -8,6 +8,6 @@ class Location < Vector
   end
 
   def inspect
-    "L(#{x},#{y})"
+    "@(#{x},#{y})"
   end
 end

@@ -20,6 +20,14 @@ class Grid
     inspect
   end
 
+  def each
+    num_rows.times do |row_idx|
+      num_cols.times do |col_idx|
+        yield [Location.new(x: col_idx, y: row_idx), @matrix[row_idx][col_idx]]
+      end
+    end
+  end
+
   # returns Location|nil
   def find(value)
     num_rows.times do |row_idx|
