@@ -51,7 +51,6 @@ module Days
 
       def blink(times) # rubocop:disable Metrics/MethodLength
         times.times do
-          puts it
           insertions = []
           @list.each do |node|
             value, new_value = blink_stone(node.value)
@@ -141,12 +140,58 @@ module Days
       end
     end
 
+    class SolutionWJ
+      def initialize(stones)
+        @stones = Hash.new(0)
+        stones.each { @stones[it] = 1 }
+      end
+
+      def blink_stone(stone)
+        return [1] if stone.zero?
+
+        stone_s = stone.to_s
+        if stone.to_s.length.even?
+          half = stone_s.length / 2
+          return [
+            stone_s[0...half].to_i,
+            stone_s[half..].to_i,
+          ]
+        end
+
+        [stone * 2024]
+      end
+
+      def blink_all
+        new_stones = Hash.new(0)
+        @stones.each do |stone, count|
+          blink_stone(stone).each do |new_stone|
+            new_stones[new_stone] += count
+          end
+        end
+        @stones = new_stones
+      end
+
+      def blink(times)
+        times.times do
+          blink_all
+        end
+      end
+
+      def num_stones
+        @stones.values.sum
+      end
+    end
+
     def part_a
-      solution = Solution.new(parse_input)
-      solution.blink(25)
-      solution.num_stones.to_s
-      # 199982 instant
-      solution = ListSolution.new(parse_input)
+      # # solution = Solution.new(parse_input)
+      # # solution.blink(25)
+      # # solution.num_stones.to_s
+      # # # 199982 instant
+      # solution = ListSolution.new(parse_input)
+      # solution.blink(25)
+      # solution.num_stones.to_s
+      # # 199982 instant
+      solution = SolutionWJ.new(parse_input)
       solution.blink(25)
       solution.num_stones.to_s
       # 199982 instant
@@ -162,14 +207,41 @@ module Days
       # - maybe faster inserts with no array rewriting
 
       # it's list time
-      solution = ListSolution.new(parse_input)
-      solution.blink(75)
-      solution.num_stones.to_s
+      # solution = ListSolution.new(parse_input)
+      # solution.blink(75)
+      # solution.num_stones.to_s
 
       # list solution STILL too slow after about 30 blinks
       # just too many to process individually...
       # do we have to look for a pattern for what happens
       # to classes of numbers?
+
+      # Thanks to https://winslowjosiah.com/blog/2024/12/11/advent-of-code-2024-day-11/
+      # for pointing out that:
+      #   the stones don't affect each other
+      #   each stone can be handled on its own
+      # so we can store a hash of stone-number => count
+      # each "blink" we iterate of the existing hash and create a new
+      # one by doing each "stone-number" once, but adding count to the new-count
+      # Example: "24 6 6"
+      # INITIAL: {24=>1 6=>2}
+      #          24 becomes 2 and 4 (*1 each)
+      #           6 becomes 12144 (*1)
+      # ITERATE: {2=>1, 4=>1, 12144=>2}
+      #           2 becomes 4048 (*1)
+      #           4 becomes 8096 (*1)
+      #       12144 becomes 24579456 (*2)
+      # ITERATE: {4048=>1, 8096=>1, 24579456=>2}
+      #        4048 becomes 40 and 48 (*1)
+      #        8096 becomes 80 and 96 (*1)
+      #    24579456 becomes 2457 and 9456 (*2)
+      # ITERATE: {40=>1, 48=>1, 80=>1, 96=>1, 2457=>2, 9456=>2}
+      # etc...
+
+      solution = SolutionWJ.new(parse_input)
+      solution.blink(75)
+      solution.num_stones.to_s
+      # 237149922829154 instant
     end
 
     def parse_input
