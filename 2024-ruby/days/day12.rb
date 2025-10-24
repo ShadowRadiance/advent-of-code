@@ -29,13 +29,18 @@ module Days
         end
       end
 
+      Fence = Data.define(:region_id, :location, :direction)
+      Side = Struct.new(:region_id, :plant, :start_loc, :end_loc, :direction, :length) # rubocop:disable Lint/StructNewOverride
+
       class Region
-        attr_reader :id, :plant, :plots
+        attr_reader :id, :plant, :plots, :fences, :sides
 
         def initialize(plant)
           @id = self.class.next_id
           @plant = plant
           @plots = []
+          @fences = []
+          @sides = []
         end
 
         def to_s = "#{id}/#{plant}: #{plots}"
@@ -47,8 +52,64 @@ module Days
 
         def perimeter
           plots.sum do |plot|
-            4 - plot.neighbours.filter { it.plant == plant }.length
+            4 - plot.neighbours.filter { it.region.id == id }.length
           end
+        end
+
+        def num_sides
+          build_fences
+          build_sides
+
+          # puts fences
+          # puts sides
+
+          sides.length
+        end
+
+        def build_fences
+          plots.each do |plot|
+            plot.news_neighbours.each do |direction, neighbour|
+              next if neighbour&.region&.id == id
+
+              @fences << Fence.new(id, plot.location, direction)
+            end
+          end
+        end
+
+        def build_sides
+          # collapse any fences that are part of the same "side"
+          # that is adjacent to a side, pointing the same direction
+          fences.each { |fence| collapse_into_side(fence) }
+        end
+
+        def collapse_into_side(fence) # rubocop:disable Metrics/MethodLength,Metrics/AbcSize
+          found = false
+          sides.each do |side|
+            next unless side.direction == fence.direction
+
+            if side.end_loc.cardinally_adjacent?(fence.location)
+              side.end_loc = fence.location
+              side.length += 1
+              found = true
+              break
+            elsif side.start_loc.cardinally_adjacent?(fence.location)
+              side.start_loc = fence.location
+              side.length += 1
+              found = true
+              break
+            end
+          end
+
+          return if found
+
+          sides << Side.new(
+            region_id: id,
+            plant: plant,
+            start_loc: fence.location,
+            end_loc: fence.location,
+            length: 1,
+            direction: fence.direction,
+          )
         end
 
         class << self
@@ -145,7 +206,10 @@ module Days
     end
 
     def part_b
-      "PENDING_B"
+      solution = Solution.new(parse_input)
+      solution.regions
+              .sum { it.area * it.num_sides }
+              .to_s
     end
 
     private
