@@ -10,7 +10,17 @@ module Days
     end
 
     class Solution
-      Plot = Struct.new(:location, :plant, :news_neighbours, :region, keyword_init: true) do
+      class Plot
+        def initialize(location:, plant:, news_neighbours:, region:, grid:)
+          @location = location
+          @plant = plant
+          @news_neighbours = news_neighbours
+          @region = region
+          @grid = grid
+        end
+        attr_reader :location, :plant, :news_neighbours
+        attr_accessor :region
+
         def to_s = "#{plant}-#{location}"
         def inspect = to_s
 
@@ -26,6 +36,40 @@ module Days
 
         def neighbours
           news_neighbours.values.compact
+        end
+
+        def corners
+          # For each L of neighbours
+          #   There is an exterior corner if neither neighbour is in the region.
+          #   There is an interior corner if both neighbours are in, but their combined offset (the diagonal) is out
+          corner_tests.sum do |keys, diagonal|
+            next 1 if keys.all? do |key|
+              other_region?(news_neighbours[key])
+            end
+
+            next 1 if keys.all? do |key|
+              same_region?(news_neighbours[key]) && @grid.value_at(location + diagonal) != region.plant
+            end
+
+            0
+          end
+        end
+
+        def same_region?(neighbour)
+          neighbour&.region&.id == region.id
+        end
+
+        def other_region?(neighbour)
+          !same_region?(neighbour)
+        end
+
+        def corner_tests
+          [
+            [%i[north east], Direction.north_east],
+            [%i[east south], Direction.south_east],
+            [%i[south west], Direction.south_west],
+            [%i[west north], Direction.north_west],
+          ]
         end
       end
 
@@ -57,6 +101,11 @@ module Days
         end
 
         def num_sides
+          # num_sides === num_corners
+          plots.sum(&:corners)
+        end
+
+        def num_sides_worked_only_for_tests
           build_fences
           build_sides
 
@@ -143,6 +192,7 @@ module Days
             plant: value,
             news_neighbours: empty_neighbours,
             region: nil,
+            grid: grid,
           )
           @plots << plot
           @plots_by_location[location] = plot
@@ -210,6 +260,7 @@ module Days
       solution.regions
               .sum { it.area * it.num_sides }
               .to_s
+      # 870202 instant
     end
 
     private
