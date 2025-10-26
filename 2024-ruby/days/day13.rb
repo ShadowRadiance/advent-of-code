@@ -99,10 +99,23 @@ module Days
     def part_a
       machines = parse_input
       machines.map(&:cheapest_prize).compact.sum.to_s
+      # 29877 instant
     end
 
     def part_b
-      "PENDING_B"
+      # prizes are actually 10000000000000 (10 trillion) further on the X and Y axes
+      machines = parse_input.map do |machine|
+        Machine.new(
+          button_a: machine.button_a,
+          button_b: machine.button_b,
+          prize: AOC::Location.new(
+            x: machine.prize.x + 10_000_000_000_000,
+            y: machine.prize.y + 10_000_000_000_000,
+          ),
+        )
+      end
+      machines.map(&:cheapest_prize).compact.sum.to_s
+      # 99423413811305 instant
     end
 
     private
