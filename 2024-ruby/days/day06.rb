@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require_relative "../lib/bounds"
-require_relative "../lib/direction"
+require_relative "../lib/aoc/bounds"
+require_relative "../lib/aoc/direction"
 
 require_relative "day06/guard"
 require_relative "day06/map"
@@ -24,7 +24,7 @@ module Days
         location = map.find_char(char)
         next unless location
 
-        Guard.new(location, Direction.from_char(char))
+        Guard.new(location, AOC::Direction.from_char(char))
       end.first
     end
 

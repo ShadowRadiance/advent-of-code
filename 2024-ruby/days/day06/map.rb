@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require_relative "../../lib/bounds"
-require_relative "../../lib/location"
+require_relative "../../lib/aoc/bounds"
+require_relative "../../lib/aoc/location"
 
 module Days
   class Day06
@@ -18,7 +18,7 @@ module Days
       def find_char(char)
         num_rows.times do |row_idx|
           num_cols.times do |col_idx|
-            return Location.new(x: col_idx, y: row_idx) if @matrix[row_idx][col_idx] == char
+            return AOC::Location.new(x: col_idx, y: row_idx) if @matrix[row_idx][col_idx] == char
           end
         end
         nil
@@ -41,7 +41,7 @@ module Days
       end
 
       def bounds
-        Bounds.new(
+        AOC::Bounds.new(
           min_x: 0,
           min_y: 0,
           max_x: num_cols - 1,

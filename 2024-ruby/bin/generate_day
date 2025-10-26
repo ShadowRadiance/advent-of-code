@@ -11,8 +11,8 @@ def parse_day(args)
       .tap { |d| raise "Day must be between 1 and 25" unless (1..25).cover?(d) }
 end
 
-DayGenerator.new(
-  aoc: AOC.new(base_path: File.dirname(__dir__)),
+Support::DayGenerator.new(
+  aoc: Support::AOC.new(base_path: File.dirname(__dir__)),
   year: 2024,
   day: parse_day(ARGV),
 ).generate

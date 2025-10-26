@@ -2,7 +2,7 @@
 
 require_relative "base"
 require_relative "../map"
-require_relative "../../../lib/location"
+require_relative "../../../lib/aoc/location"
 
 module Days
   class Day06

@@ -3,7 +3,7 @@
 require_relative "base"
 require_relative "../map"
 require_relative "../path_entry"
-require_relative "../../../lib/direction"
+require_relative "../../../lib/aoc/direction"
 
 module Days
   class Day06
@@ -50,7 +50,7 @@ module Days
           map.num_rows.times do |y|
             map.num_cols.times do |x|
               [north, east, south, west].each do |dir|
-                path_entry = PathEntry.new(Location.new(x: x, y: y), dir)
+                path_entry = PathEntry.new(AOC::Location.new(x: x, y: y), dir)
                 result[path_entry] = build_state_transition(path_entry, map)
               end
             end
@@ -126,10 +126,10 @@ module Days
           true
         end
 
-        def north = Direction.north
-        def south = Direction.south
-        def west = Direction.west
-        def east = Direction.east
+        def north = AOC::Direction.north
+        def south = AOC::Direction.south
+        def west = AOC::Direction.west
+        def east = AOC::Direction.east
       end
     end
   end

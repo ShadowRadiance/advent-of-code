@@ -13,7 +13,7 @@ day, part = ARGV
 raise "Invalid Part" unless [nil, "a", "b"].include?(part)
 raise "Invalid Day" unless day.nil? || (1..25).cover?(day.to_i)
 
-aoc = AOC.new(base_path: File.dirname(__dir__))
+aoc = Support::AOC.new(base_path: File.dirname(__dir__))
 
 result = if day.nil?
            aoc.run_all

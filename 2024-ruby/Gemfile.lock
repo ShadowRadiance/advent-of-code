@@ -21,6 +21,7 @@ GEM
     listen (3.9.0)
       rb-fsevent (~> 0.10, >= 0.10.3)
       rb-inotify (~> 0.9, >= 0.9.10)
+    matrix (0.4.3)
     parallel (1.27.0)
     parser (3.3.9.0)
       ast (~> 2.4.1)
@@ -91,6 +92,7 @@ PLATFORMS
 
 DEPENDENCIES
   debug
+  matrix
   rerun
   rspec
   rspec-pride

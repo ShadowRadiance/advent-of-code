@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require_relative "../lib/bounds"
-require_relative "../lib/location"
+require_relative "../lib/aoc/bounds"
+require_relative "../lib/aoc/location"
 
 module Days
   class Day08
@@ -15,7 +15,7 @@ module Days
         row.each_with_index do |cell, cell_idx|
           if cell != "."
             antennae[cell] ||= []
-            antennae[cell] << Location.new(x: cell_idx, y: row_idx)
+            antennae[cell] << AOC::Location.new(x: cell_idx, y: row_idx)
           end
         end
       end
@@ -69,7 +69,7 @@ module Days
 
     def shared_solution(extended:)
       matrix = puzzle_input.lines(chomp: true).map(&:chars)
-      bounds = Bounds.new(
+      bounds = AOC::Bounds.new(
         min_x: 0,
         min_y: 0,
         max_x: matrix.first.length - 1,

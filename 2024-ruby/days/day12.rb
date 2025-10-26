@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require_relative "../lib/grid"
-require_relative "../lib/direction"
+require_relative "../lib/aoc/grid"
+require_relative "../lib/aoc/direction"
 
 module Days
   class Day12
@@ -65,10 +65,10 @@ module Days
 
         def corner_tests
           [
-            [%i[north east], Direction.north_east],
-            [%i[east south], Direction.south_east],
-            [%i[south west], Direction.south_west],
-            [%i[west north], Direction.north_west],
+            [%i[north east], AOC::Direction.north_east],
+            [%i[east south], AOC::Direction.south_east],
+            [%i[south west], AOC::Direction.south_west],
+            [%i[west north], AOC::Direction.north_west],
           ]
         end
       end
@@ -175,7 +175,7 @@ module Days
 
       def initialize(matrix)
         Region.reset_id
-        @grid = Grid.new(matrix)
+        @grid = AOC::Grid.new(matrix)
         @plots = []
         @plots_by_location = {}
         @regions = []
@@ -237,10 +237,10 @@ module Days
 
       def news = { north: north, east: east, south: south, west: west }
       def empty_neighbours = { north: nil, east: nil, south: nil, west: nil }
-      def north = Direction.north
-      def east = Direction.east
-      def south = Direction.south
-      def west = Direction.west
+      def north = AOC::Direction.north
+      def east = AOC::Direction.east
+      def south = AOC::Direction.south
+      def west = AOC::Direction.west
     end
 
     def parse_input

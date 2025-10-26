@@ -41,8 +41,8 @@ RSpec.describe "Days::Day04" do
 
   describe ".xmas_in_direction?" do
     it "returns true when XMAS can be found in direction" do
-      ex_loc = Location.new(x: 0, y: 4)
-      direction = Direction.compass_directions[:east]
+      ex_loc = AOC::Location.new(x: 0, y: 4)
+      direction = AOC::Direction.east
       expect(
         day_runner.xmas_in_direction?(
           ex_loc,

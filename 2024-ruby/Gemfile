@@ -2,10 +2,13 @@
 
 source "https://rubygems.org"
 
-gem "rerun"
-gem "rspec"
-gem "rspec-pride"
-gem "rubocop"
-gem "rubocop-rspec"
+gem "matrix"
 
-gem "debug"
+group :development do
+  gem "debug"
+  gem "rerun"
+  gem "rspec"
+  gem "rspec-pride"
+  gem "rubocop"
+  gem "rubocop-rspec"
+end

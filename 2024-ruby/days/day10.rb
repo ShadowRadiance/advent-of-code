@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-require_relative "../lib/location"
-require_relative "../lib/direction"
-require_relative "../lib/grid"
+require_relative "../lib/aoc/location"
+require_relative "../lib/aoc/direction"
+require_relative "../lib/aoc/grid"
 
 module Days
   class Day10
@@ -23,7 +23,7 @@ module Days
 
       def initialize(puzzle_input)
         @matrix = puzzle_input.lines(chomp: true).map { it.chars.map(&:to_i) }
-        @grid = Grid.new(matrix)
+        @grid = AOC::Grid.new(matrix)
         @locations = Array.new(10) { [] }
         @trails = Array.new(10)
         parse_locations
@@ -81,15 +81,15 @@ module Days
         matrix.each_index do |y|
           matrix.first.each_index do |x|
             value = matrix[y][x]
-            locations[value] << Location.new(x: x, y: y)
+            locations[value] << AOC::Location.new(x: x, y: y)
           end
         end
       end
 
-      def north = Direction.north
-      def south = Direction.south
-      def east = Direction.east
-      def west = Direction.west
+      def north = AOC::Direction.north
+      def south = AOC::Direction.south
+      def east = AOC::Direction.east
+      def west = AOC::Direction.west
 
       attr_reader :grid, :matrix, :locations, :trails
     end

@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-require_relative "../lib/location"
-require_relative "../lib/direction"
-require_relative "../lib/bounds"
+require_relative "../lib/aoc/location"
+require_relative "../lib/aoc/direction"
+require_relative "../lib/aoc/bounds"
 
 module Days
   class Day04
@@ -11,7 +11,7 @@ module Days
     def initialize(puzzle_input)
       @puzzle_input = puzzle_input
       @matrix = parse_input
-      @matrix_bounds = Bounds.new(
+      @matrix_bounds = AOC::Bounds.new(
         min_x: 0, min_y: 0,
         max_x: (@matrix.first.length - 1),
         max_y: @matrix.length - 1,
@@ -24,7 +24,7 @@ module Days
         row.filter_map.with_index do |letter, col_idx|
           next nil unless letter == "X"
 
-          location = Location.new(x: col_idx, y: row_idx)
+          location = AOC::Location.new(x: col_idx, y: row_idx)
           {
             location: location,
             xmases: count_xmases(location),
@@ -43,7 +43,7 @@ module Days
         row.filter_map.with_index do |letter, col_idx|
           next nil unless letter == "A"
 
-          location = Location.new(x: col_idx, y: row_idx)
+          location = AOC::Location.new(x: col_idx, y: row_idx)
           {
             location: location,
             x_mases: count_crossed_mases(location),
@@ -83,10 +83,10 @@ module Days
       #     .A.   ||   .A.   ||   .A.   ||   .A.
       #     M.S   ||   S.M   ||   S.S   ||   M.M
 
-      north_east = a_loc + Direction.compass_directions[:north_east]
-      north_west = a_loc + Direction.compass_directions[:north_west]
-      south_east = a_loc + Direction.compass_directions[:south_east]
-      south_west = a_loc + Direction.compass_directions[:south_west]
+      north_east = a_loc + AOC::Direction.north_east
+      north_west = a_loc + AOC::Direction.north_west
+      south_east = a_loc + AOC::Direction.south_east
+      south_west = a_loc + AOC::Direction.south_west
 
       [north_east, north_west, south_east, south_west].each do |loc|
         ensure_location_readable(loc)
@@ -112,7 +112,7 @@ module Days
     end
 
     def count_xmases(ex_loc)
-      counts = Direction.compass_directions.values.map do |direction|
+      counts = AOC::Direction.compass_directions.values.map do |direction|
         xmas_in_direction?(ex_loc, direction) ? 1 : 0
       rescue OutOfBoundsError => _e
         nil
