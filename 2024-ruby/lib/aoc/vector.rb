@@ -10,6 +10,10 @@ module AOC
       inspect
     end
 
+    def length
+      Math.sqrt((x * x) + (y * y))
+    end
+
     def +(other)
       case other
       when Vector

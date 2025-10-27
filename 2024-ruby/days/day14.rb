@@ -12,14 +12,14 @@ module Days
     end
 
     LINE_PARSER = /p=(\d+),(\d+)\ v=(-?\d+),(-?\d+)/
-    Robot = Data.define(:location, :direction)
+    Robot = Struct.new(:location, :direction, keyword_init: true)
 
     def robot_from_description(line)
       # p=0,4 v=3,-3
       matches = LINE_PARSER.match(line)
       Robot.new(
-        AOC::Location.new(x: matches[1].to_i, y: matches[2].to_i),
-        AOC::Direction.new(x: matches[3].to_i, y: matches[4].to_i),
+        location: AOC::Location.new(x: matches[1].to_i, y: matches[2].to_i),
+        direction: AOC::Direction.new(x: matches[3].to_i, y: matches[4].to_i),
       )
     end
 
@@ -32,10 +32,7 @@ module Days
     end
 
     def walk_robot(robot, times)
-      Robot.new(
-        location: teleport_wrap(robot.location + (robot.direction * times)),
-        direction: robot.direction,
-      )
+      robot.location = teleport_wrap(robot.location + (robot.direction * times))
     end
 
     def count_robots_in_quadrant(quadrant, robots)
@@ -78,14 +75,14 @@ module Days
       @max_x = testing ? 11 : 101
       @max_y = testing ? 7 : 103
       robots = parse_input
-      robots = robots.map { |robot| walk_robot(robot, 100) }
+      robots.each { |robot| walk_robot(robot, 100) }
 
       quadrants.map { count_robots_in_quadrant(it, robots) }
                .reduce(:*)
                .to_s
     end
 
-    def part_b
+    def part_b(testing: false)
       # During the bathroom break, someone notices that these robots seem
       # awfully similar to ones built and used at the North Pole. If they're
       # the same type of robots, they should have a hard-coded Easter egg:
@@ -95,7 +92,65 @@ module Days
       #
       # WAT? How do we know when it's christmas tree enough???
 
-      "PENDING_B"
+      # https://www.reddit.com/r/adventofcode/comments/1hdw23y/2024_day_14_part_2_what/
+      # redditor suggested - look for standard deviations from center
+      #                    - min(sum(stddev of robot from center))
+
+      @max_x = testing ? 11 : 101
+      @max_y = testing ? 7 : 103
+
+      grid = AOC::Grid.new(Array.new(@max_y) { Array.new(@max_x, 0) })
+      robots = parse_input
+      robots.each do |robot|
+        grid.set_value_at(robot.location, grid.value_at(robot.location) + 1)
+      end
+
+      result = search_for_xmas_trees(grid, robots)
+
+      return "PENDING_B" if defined?(RSpec)
+
+      result
+      # 7501 in 30s
+    end
+
+    def grid_string(grid)
+      grid.to_s.gsub("0", ".")
+    end
+
+    def search_for_xmas_trees(grid, robots)
+      max_seconds = @max_x * @max_y
+      center = AOC::Location.new((@max_x + 1) / 2, (@max_y + 1) / 2)
+
+      initial_grid = grid_string(grid)
+
+      standard_deviations = []
+
+      max_seconds.times do |second|
+        deviations = []
+        robots.each do |robot|
+          grid.set_value_at(robot.location, grid.value_at(robot.location) - 1)
+          walk_robot(robot, 1)
+          grid.set_value_at(robot.location, grid.value_at(robot.location) + 1)
+          deviations << (robot.location - center).length
+        end
+        standard_deviation = Math.sqrt(deviations.map { it * it }.sum / deviations.size)
+        standard_deviations <<
+          { sd: standard_deviation, second: second, grid: grid_string(grid) }
+      end
+      final_grid = grid.to_s.gsub("0", ".")
+      raise "whoops" unless final_grid == initial_grid
+
+      # puts grid_string(grid_at_lsd) unless defined?(RSpec)
+
+      standard_deviations.sort_by! { it[:sd] }
+      best = standard_deviations[0]
+
+      puts "#{best[:second]} #{best[:sd]}" unless defined?(RSpec)
+      puts best[:grid] unless defined?(RSpec)
+
+      # 7501 is too low (seconds was 0-based instead of 1-based)
+      # 7502 is the right answer
+      best[:second] - 1
     end
 
     private

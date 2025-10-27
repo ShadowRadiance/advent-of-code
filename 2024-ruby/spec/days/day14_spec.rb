@@ -26,18 +26,54 @@ RSpec.describe "Days::Day14" do
     it "parses the input into robots" do
       expect(day_runner.parse_input).to eq(
         [
-          Days::Day14::Robot.new(AOC::Location.new(0, 4), AOC::Direction.new(3, -3)),
-          Days::Day14::Robot.new(AOC::Location.new(6, 3), AOC::Direction.new(-1, -3)),
-          Days::Day14::Robot.new(AOC::Location.new(10, 3), AOC::Direction.new(-1, 2)),
-          Days::Day14::Robot.new(AOC::Location.new(2, 0), AOC::Direction.new(2, -1)),
-          Days::Day14::Robot.new(AOC::Location.new(0, 0), AOC::Direction.new(1, 3)),
-          Days::Day14::Robot.new(AOC::Location.new(3, 0), AOC::Direction.new(-2, -2)),
-          Days::Day14::Robot.new(AOC::Location.new(7, 6), AOC::Direction.new(-1, -3)),
-          Days::Day14::Robot.new(AOC::Location.new(3, 0), AOC::Direction.new(-1, -2)),
-          Days::Day14::Robot.new(AOC::Location.new(9, 3), AOC::Direction.new(2, 3)),
-          Days::Day14::Robot.new(AOC::Location.new(7, 3), AOC::Direction.new(-1, 2)),
-          Days::Day14::Robot.new(AOC::Location.new(2, 4), AOC::Direction.new(2, -3)),
-          Days::Day14::Robot.new(AOC::Location.new(9, 5), AOC::Direction.new(-3, -3)),
+          Days::Day14::Robot.new(
+            location: AOC::Location.new(0, 4),
+            direction: AOC::Direction.new(3, -3),
+          ),
+          Days::Day14::Robot.new(
+            location: AOC::Location.new(6, 3),
+            direction: AOC::Direction.new(-1, -3),
+          ),
+          Days::Day14::Robot.new(
+            location: AOC::Location.new(10, 3),
+            direction: AOC::Direction.new(-1, 2),
+          ),
+          Days::Day14::Robot.new(
+            location: AOC::Location.new(2, 0),
+            direction: AOC::Direction.new(2, -1),
+          ),
+          Days::Day14::Robot.new(
+            location: AOC::Location.new(0, 0),
+            direction: AOC::Direction.new(1, 3),
+          ),
+          Days::Day14::Robot.new(
+            location: AOC::Location.new(3, 0),
+            direction: AOC::Direction.new(-2, -2),
+          ),
+          Days::Day14::Robot.new(
+            location: AOC::Location.new(7, 6),
+            direction: AOC::Direction.new(-1, -3),
+          ),
+          Days::Day14::Robot.new(
+            location: AOC::Location.new(3, 0),
+            direction: AOC::Direction.new(-1, -2),
+          ),
+          Days::Day14::Robot.new(
+            location: AOC::Location.new(9, 3),
+            direction: AOC::Direction.new(2, 3),
+          ),
+          Days::Day14::Robot.new(
+            location: AOC::Location.new(7, 3),
+            direction: AOC::Direction.new(-1, 2),
+          ),
+          Days::Day14::Robot.new(
+            location: AOC::Location.new(2, 4),
+            direction: AOC::Direction.new(2, -3),
+          ),
+          Days::Day14::Robot.new(
+            location: AOC::Location.new(9, 5),
+            direction: AOC::Direction.new(-3, -3),
+          ),
         ],
       )
     end
@@ -51,7 +87,7 @@ RSpec.describe "Days::Day14" do
 
   describe "#part_b" do
     it "returns the correct value for part B" do
-      expect(day_runner.part_b).to eq "PENDING_B"
+      expect(day_runner.part_b(testing: true)).to eq "PENDING_B"
     end
   end
 end
