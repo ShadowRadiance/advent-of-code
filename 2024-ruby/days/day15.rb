@@ -38,9 +38,8 @@ module Days
         element_in_direction = @grid.value_at(@location + direction)
         element_in_direction.move(direction)
         super
-      rescue RuntimeError => e
+      rescue RuntimeError => _e
         # do nothing
-        # puts "Robot #{e.message}" unless defined?(RSpec)
       end
     end
 
@@ -81,7 +80,7 @@ module Days
 
       def to_s = "["
 
-      def move(direction)
+      def move(direction) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
         case direction
         when Solution::EAST # buttwards
           element_in_direction = @grid.value_at(@location + (direction * 2))
