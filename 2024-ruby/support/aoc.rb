@@ -4,6 +4,14 @@ module Support
   class AOC
     attr_reader :base_path
 
+    # TODO: This should be injected from a config file
+    SLOW_LIST = %w[
+      6b
+      7b
+      9b
+      14b
+    ].freeze
+
     def initialize(base_path:)
       @base_path = base_path
     end
@@ -13,24 +21,15 @@ module Support
     end
 
     def run_day(day)
-      require_day_runner(day)
-      klass_name = class_name(day)
-      if Object.const_defined?(klass_name)
-        klass = Object.const_get(klass_name)
-        day_runner = klass.new(input_data(day))
-        {
-          part_a: day_runner.part_a,
-          part_b: day_runner.part_b,
-        }
-      else
-        {
-          part_a: "NO RUNNER FOR DAY #{padded(day)}",
-          part_b: "NO RUNNER FOR DAY #{padded(day)}",
-        }
-      end
+      {
+        part_a: run_part(day, "a"),
+        part_b: run_part(day, "b"),
+      }
     end
 
     def run_part(day, part)
+      return "SLOW" if SLOW_LIST.include?("#{day}#{part}") && ENV["FORCE_SLOW"] != "1"
+
       require_day_runner(day)
       klass_name = class_name(day)
       if Object.const_defined?(klass_name)
