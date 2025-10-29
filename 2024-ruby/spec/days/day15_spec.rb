@@ -46,6 +46,20 @@ RSpec.describe "Days::Day15" do
     INPUT
   end
 
+  let(:smaller_example_for_part_b) do
+    <<~INPUT
+      #######
+      #...#.#
+      #.....#
+      #..OO@#
+      #..O..#
+      #.....#
+      #######
+
+      <vv<<^^<<^^
+    INPUT
+  end
+
   describe "#part_a" do
     context "with larger example" do
       let(:puzzle_input) { larger_example }
@@ -65,8 +79,20 @@ RSpec.describe "Days::Day15" do
   end
 
   describe "#part_b" do
-    it "returns the correct value for part B" do
-      expect(day_runner.part_b).to eq "PENDING_B"
+    context "with larger example" do
+      let(:puzzle_input) { larger_example }
+
+      it "returns the correct value for part B" do
+        expect(day_runner.part_b).to eq "9021"
+      end
+    end
+
+    context "with smaller example" do
+      let(:puzzle_input) { smaller_example_for_part_b }
+
+      it "returns the correct value for part B" do
+        expect(day_runner.part_b).to eq "618"
+      end
     end
   end
 end
