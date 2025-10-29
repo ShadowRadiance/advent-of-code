@@ -6,7 +6,7 @@ require_relative "../lib/aoc/location"
 require_relative "../lib/aoc/direction"
 
 module Days
-  class Day14
+  class Day14 # rubocop:disable Metrics/ClassLength
     def initialize(puzzle_input)
       @puzzle_input = puzzle_input
     end
@@ -117,7 +117,7 @@ module Days
       grid.to_s.gsub("0", ".")
     end
 
-    def search_for_xmas_trees(grid, robots)
+    def search_for_xmas_trees(grid, robots) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
       max_seconds = @max_x * @max_y
       center = AOC::Location.new((@max_x + 1) / 2, (@max_y + 1) / 2)
 
