@@ -21,6 +21,15 @@ module AOC
       }
     end
 
+    def self.cardinal_directions
+      {
+        north: north,
+        east: east,
+        south: south,
+        west: west,
+      }
+    end
+
     def self.from_char(char)
       case char
       when "^" then Direction.north
