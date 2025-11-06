@@ -84,10 +84,28 @@ RSpec.describe "Days::Day16" do
   end
 
   describe "#part_b" do
-    let(:puzzle_input) { example_one }
+    context "with tiny example" do
+      let(:puzzle_input) { tiny_example }
 
-    it "returns the correct value for part B" do
-      expect(day_runner.part_b).to eq "PENDING_B"
+      it "returns the correct value for part B" do
+        expect(day_runner.part_b).to eq "5"
+      end
+    end
+
+    fcontext "with example one" do
+      let(:puzzle_input) { example_one }
+
+      it "returns the correct value for part B" do
+        expect(day_runner.part_b).to eq "45"
+      end
+    end
+
+    context "with example two" do
+      let(:puzzle_input) { example_two }
+
+      it "returns the correct value for part B" do
+        expect(day_runner.part_b).to eq "64"
+      end
     end
   end
 end
