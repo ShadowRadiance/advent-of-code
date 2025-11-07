@@ -63,25 +63,35 @@ RSpec.describe "Days::Day17" do
   describe "day runner" do
     let(:day_runner) { Days::Day17.new(puzzle_input) }
 
-    let(:puzzle_input) do
-      <<~INPUT
-        Register A: 729
-        Register B: 0
-        Register C: 0
-
-        Program: 0,1,5,4,3,0
-      INPUT
-    end
-
     describe "#part_a" do
+      let(:puzzle_input) do
+        <<~INPUT
+          Register A: 729
+          Register B: 0
+          Register C: 0
+
+          Program: 0,1,5,4,3,0
+        INPUT
+      end
+
       it "returns the correct value for part A" do
         expect(day_runner.part_a).to eq "4,6,3,5,6,3,5,2,1,0"
       end
     end
 
     describe "#part_b" do
+      let(:puzzle_input) do
+        <<~INPUT
+          Register A: 2024
+          Register B: 0
+          Register C: 0
+
+          Program: 0,3,5,4,3,0
+        INPUT
+      end
+
       it "returns the correct value for part B" do
-        expect(day_runner.part_b).to eq "PENDING_B"
+        expect(day_runner.part_b(testing: true)).to eq "117440"
       end
     end
   end
