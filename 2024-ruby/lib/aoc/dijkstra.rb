@@ -9,6 +9,7 @@ module AOC
     def initialize(vertices, edges)
       @vertices = vertices
       @edges = edges
+      @edges_by_source = edges.group_by(&:source)
     end
 
     # computes the shortest distance from starting node
@@ -21,12 +22,10 @@ module AOC
       parents = Hash.new { nil }
 
       queue = PriorityQueue.new
-      @vertices.each do |vertex|
-        queue.push(
-          vertex,
-          priority: vertex == source ? 0 : Float::INFINITY,
-        )
-      end
+      # Instead of filling the priority queue with all nodes in the initialization phase, it is possible to initialize
+      # it to contain only source; then, inside the "if alt < dist[v]" block, the reprioritize() becomes an
+      # add_with_priority() operation.
+      queue.push(source, priority: 0)
 
       until queue.empty?
         vertex_u = queue.pop
@@ -37,7 +36,7 @@ module AOC
 
           parents[vertex_v] = vertex_u
           distances[vertex_v] = new_distance
-          queue.reprioritize(vertex_v, new_distance)
+          queue.push(vertex_v, priority: new_distance)
         end
       end
 
@@ -60,12 +59,10 @@ module AOC
       parents = Hash.new { [] }
 
       queue = PriorityQueue.new
-      @vertices.each do |vertex|
-        queue.push(
-          vertex,
-          priority: vertex == source ? 0 : Float::INFINITY,
-        )
-      end
+      # Instead of filling the priority queue with all nodes in the initialization phase, it is possible to initialize
+      # it to contain only source; then, inside the "if alt < dist[v]" block, the reprioritize() becomes an
+      # add_with_priority() operation.
+      queue.push(source, priority: 0)
 
       until queue.empty?
         vertex_u = queue.pop
@@ -80,7 +77,8 @@ module AOC
           end
 
           parents[vertex_v] << vertex_u
-          queue.reprioritize(vertex_v, new_distance)
+          parents[vertex_v].uniq!
+          queue.push(vertex_v, priority: new_distance)
         end
       end
 
@@ -100,7 +98,7 @@ module AOC
     private
 
     def edges_of(vertex)
-      @edges.filter { |edge| edge.source == vertex }
+      @edges_by_source[vertex] || []
     end
   end
 end
