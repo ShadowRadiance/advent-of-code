@@ -21,7 +21,7 @@ module AOC
 
       parents = Hash.new { nil }
 
-      queue = PriorityQueue.new
+      queue = PriorityQueue.new(priority_only: true)
       # Instead of filling the priority queue with all nodes in the initialization phase, it is possible to initialize
       # it to contain only source; then, inside the "if alt < dist[v]" block, the reprioritize() becomes an
       # add_with_priority() operation.

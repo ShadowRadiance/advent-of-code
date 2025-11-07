@@ -4,8 +4,9 @@ require_relative "heap"
 
 module AOC
   class PriorityQueue
-    def initialize
+    def initialize(priority_only: false)
       @heap = Heap.new
+      @element_class = priority_only ? PriorityOnlyElement : Element
     end
 
     def empty?
@@ -21,7 +22,7 @@ module AOC
     end
 
     def push(value, priority: 0)
-      @heap.add(Element.new(value, priority: priority))
+      @heap.add(@element_class.new(value, priority: priority))
     end
 
     def pop
@@ -29,7 +30,7 @@ module AOC
     end
 
     def reprioritize(value, new_priority)
-      @heap.rerank(Element.new(value, priority: new_priority))
+      @heap.rerank(@element_class.new(value, priority: new_priority))
     end
 
     class Element
@@ -53,6 +54,13 @@ module AOC
       end
     end
 
+    class PriorityOnlyElement < Element
+      def <=>(other)
+        @priority <=> other.priority
+      end
+    end
+
     private_constant :Element
+    private_constant :PriorityOnlyElement
   end
 end
