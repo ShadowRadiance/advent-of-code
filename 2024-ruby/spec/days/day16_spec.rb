@@ -5,19 +5,87 @@ require_relative "../../days/day16"
 RSpec.describe "Days::Day16" do
   let(:day_runner) { Days::Day16.new(puzzle_input) }
 
-  let(:puzzle_input) do
+  let(:example_one) do
     <<~INPUT
-      placeholder
+      ###############
+      #.......#....E#
+      #.#.###.#.###.#
+      #.....#.#...#.#
+      #.###.#####.#.#
+      #.#.#.......#.#
+      #.#.#####.###.#
+      #...........#.#
+      ###.#.#####.#.#
+      #...#.....#.#.#
+      #.#.#.###.#.#.#
+      #.....#...#.#.#
+      #.###.#.#.#.#.#
+      #S..#.....#...#
+      ###############
+    INPUT
+  end
+
+  let(:example_two) do
+    <<~INPUT
+      #################
+      #...#...#...#..E#
+      #.#.#.#.#.#.#.#.#
+      #.#.#.#...#...#.#
+      #.#.#.#.###.#.#.#
+      #...#.#.#.....#.#
+      #.#.#.#.#.#####.#
+      #.#...#.#.#.....#
+      #.#.#####.#.###.#
+      #.#.#.......#...#
+      #.#.###.#####.###
+      #.#.#...#.....#.#
+      #.#.#.#####.###.#
+      #.#.#.........#.#
+      #.#.#.#########.#
+      #S#.............#
+      #################
+    INPUT
+  end
+
+  let(:tiny_example) do
+    <<~INPUT
+      #####
+      #..E#
+      #.#.#
+      #S#.#
+      #####
     INPUT
   end
 
   describe "#part_a" do
-    it "returns the correct value for part A" do
-      expect(day_runner.part_a).to eq "PENDING_A"
+    context "with tiny example" do
+      let(:puzzle_input) { tiny_example }
+
+      it "returns the correct value for part A" do
+        expect(day_runner.part_a).to eq "2004"
+      end
+    end
+
+    context "with example one" do
+      let(:puzzle_input) { example_one }
+
+      it "returns the correct value for part A" do
+        expect(day_runner.part_a).to eq "7036"
+      end
+    end
+
+    context "with example two" do
+      let(:puzzle_input) { example_two }
+
+      it "returns the correct value for part A" do
+        expect(day_runner.part_a).to eq "11048"
+      end
     end
   end
 
   describe "#part_b" do
+    let(:puzzle_input) { example_one }
+
     it "returns the correct value for part B" do
       expect(day_runner.part_b).to eq "PENDING_B"
     end
