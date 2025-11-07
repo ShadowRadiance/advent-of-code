@@ -52,5 +52,68 @@ module AOC
         expect(dijkstra.path(1, 6, parents)).to eq([1, 3, 6])
       end
     end
+
+    describe "#generate_shortest_multipaths" do
+      let(:result) { dijkstra.generate_shortest_multipaths(1) }
+
+      describe "distances" do
+        it "is expected to show the distances from the source to each vertex" do
+          expect(result.distances).to eq({ 1 => 0, 2 => 7, 3 => 9, 4 => 20, 5 => 21, 6 => 11 })
+        end
+      end
+
+      describe "parents" do
+        it "is expected to show all the parent paths from each vertex back toward the source" do
+          expect(result.parents).to eq({ 2 => [1], 3 => [1], 6 => [3], 4 => [3], 5 => [6, 4] })
+        end
+      end
+    end
+
+    describe "#multipath" do
+      context "with a trivial example" do
+        let(:parents) { { 2 => [1], 3 => [2, 1], 4 => [3], 6 => [2] } }
+
+        it "creates all paths from source to target using parents" do
+          expect(
+            {
+              a: dijkstra.multipath(1, 2, parents),
+              b: dijkstra.multipath(1, 3, parents),
+              c: dijkstra.multipath(1, 6, parents),
+              d: dijkstra.multipath(1, 4, parents),
+            },
+          ).to eq(
+            {
+              a: [
+                [1, 2],
+              ],
+              b: [
+                [1, 2, 3],
+                [1, 3],
+              ],
+              c: [
+                [1, 2, 6],
+              ],
+              d: [
+                [1, 2, 3, 4],
+                [1, 3, 4],
+              ],
+            },
+          )
+        end
+      end
+
+      context "with the main example" do
+        let(:parents) { { 2 => [1], 3 => [1], 6 => [3], 4 => [3], 5 => [6, 4] } }
+
+        it "creates all paths from source to target using parents" do
+          expect(dijkstra.multipath(1, 5, parents)).to eq(
+            [
+              [1, 3, 6, 5],
+              [1, 3, 4, 5],
+            ],
+          )
+        end
+      end
+    end
   end
 end
