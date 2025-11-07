@@ -49,6 +49,10 @@ module AOC
       Direction.new(x: y, y: -x)
     end
 
+    def flip
+      Direction.new(x: -x, y: -y)
+    end
+
     def self.north
       @north ||= Direction.new(x: +0, y: -1)
     end

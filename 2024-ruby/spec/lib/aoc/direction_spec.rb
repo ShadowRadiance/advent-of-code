@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require_relative "../../../lib/aoc/direction"
-
 module AOC
   RSpec.describe "Direction" do
     describe "Direction.compass_directions" do
