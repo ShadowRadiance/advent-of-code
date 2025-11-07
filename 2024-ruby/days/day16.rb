@@ -22,7 +22,9 @@ module Days
     end
 
     def part_b
-      "PENDING_B"
+      solution = Solution.new(parse_input)
+      solution.num_tiles_in_best_paths.to_s
+      # 489 in 26s
     end
 
     private
@@ -76,6 +78,22 @@ module Days
 
         _, distance = target_distances.min_by(&:last)
         distance
+      end
+
+      def num_tiles_in_best_paths
+        pathfinder = AOC::Dijkstra.new(@vertices.keys, @edges)
+        result = pathfinder.generate_shortest_multipaths(source_vertex.to_s)
+
+        target_distances = result.distances.select do |vertex_str, _shortest_distance|
+          @vertices[vertex_str].location == @target_location
+        end
+
+        target, _distance = target_distances.min_by(&:last)
+
+        paths = pathfinder.multipath(source_vertex.to_s, target, result.parents)
+        paths.flat_map { |path| path.map { |v| @vertices[v].location } }
+             .uniq
+             .size
       end
 
       private

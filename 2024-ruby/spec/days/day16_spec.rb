@@ -92,7 +92,7 @@ RSpec.describe "Days::Day16" do
       end
     end
 
-    fcontext "with example one" do
+    context "with example one" do
       let(:puzzle_input) { example_one }
 
       it "returns the correct value for part B" do

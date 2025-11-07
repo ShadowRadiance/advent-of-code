@@ -10,6 +10,7 @@ module Support
       7b
       9b
       14b
+      16b
     ].freeze
 
     def initialize(base_path:)
