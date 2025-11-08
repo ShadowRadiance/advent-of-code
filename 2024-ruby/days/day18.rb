@@ -67,6 +67,7 @@ module Days
     end
 
     def part_b
+      # determine the first byte that will cut off the path to the exit
       "PENDING_B"
     end
 
