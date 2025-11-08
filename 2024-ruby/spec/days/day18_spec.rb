@@ -43,7 +43,7 @@ RSpec.describe "Days::Day18" do
 
   fdescribe "#part_b" do
     it "returns the correct value for part B" do
-      expect(day_runner.part_b).to eq "6,1"
+      expect(day_runner.part_b(testing: true)).to eq "6,1"
     end
   end
 end

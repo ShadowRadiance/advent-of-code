@@ -21,10 +21,17 @@ module Days
       end
       attr_reader :falling_bytes, :grid
 
-      def drop(bytes)
+      def pre_drop(bytes)
         @falling_bytes[0...bytes].each do |byte|
           @grid.set_value_at(byte, "#")
         end
+        @falling_bytes = @falling_bytes[bytes..]
+      end
+
+      def drop
+        byte = @falling_bytes.shift
+        @grid.set_value_at(byte, "#")
+        byte
       end
 
       def shortest_path_length(source, target)
@@ -53,22 +60,54 @@ module Days
     end
 
     def part_a(testing: false)
-      height = testing ? 7 : 71
-      width = testing ? 7 : 71
-      drop = testing ? 12 : 1024
-      solver = Solver.new(puzzle_input, height, width)
-
-      solver.drop(drop)
-      solver.shortest_path_length(
-        AOC::Location.new(0, 0),
-        AOC::Location.new(width - 1, height - 1),
-      ).to_s
+      # find shortest path after dropping 1024 (or 12 if testing) bytes
+      params = setup(testing)
+      params.solver.pre_drop(params.drop)
+      params.solver.shortest_path_length(params.source, params.target).to_s
       # 312 in 0s
     end
 
-    def part_b
+    def part_b(testing: false)
       # determine the first byte that will cut off the path to the exit
-      "PENDING_B"
+      params = setup(testing)
+      params.solver.pre_drop(params.drop)
+
+      part_b_brute_force(params)
+    end
+
+    Params = Data.define(:height, :width, :drop, :solver, :source, :target)
+
+    def setup(testing)
+      height = testing ? 7 : 71
+      width = testing ? 7 : 71
+      Params.new(
+        height: height,
+        width: width,
+        drop: testing ? 12 : 1024,
+        solver: Solver.new(puzzle_input, height, width),
+        source: AOC::Location.new(0, 0),
+        target: AOC::Location.new(width - 1, height - 1),
+      )
+    end
+
+    def part_b_brute_force(params)
+      # brute force:
+      #   drop each byte
+      #   check for shortest path
+      #   if Float::INFINITY then return byte
+
+      # we know we can drop the first (12/1024) from test description and from part a
+      params.solver.pre_drop(params.drop)
+
+      spl = nil
+      until spl == Float::INFINITY
+        last_location = params.solver.drop
+        spl = params.solver.shortest_path_length(params.source, params.target)
+        # puts "SPL: #{spl}"
+      end
+      "#{last_location.x},#{last_location.y}"
+
+      # 28,26 in 3m36s
     end
 
     private
