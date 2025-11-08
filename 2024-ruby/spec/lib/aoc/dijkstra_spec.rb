@@ -4,7 +4,7 @@ require_relative "../../../lib/aoc/dijkstra"
 require_relative "../../../lib/aoc/edge"
 
 module AOC
-  RSpec.describe Dijkstra do
+  RSpec.describe "Dijkstra" do
     let(:vertices) do
       [1, 2, 3, 4, 5, 6]
     end
@@ -47,8 +47,11 @@ module AOC
     describe "#path(1,...)" do
       let(:parents) { { 2 => 1, 3 => 1, 4 => 3, 5 => 4, 6 => 3 } }
 
-      it "creates a path from source to target using parents" do
+      it "creates a path from 1 to 5 using parents" do
         expect(dijkstra.path(1, 5, parents)).to eq([1, 3, 4, 5])
+      end
+
+      it "creates a path from 1 to 6 using parents" do
         expect(dijkstra.path(1, 6, parents)).to eq([1, 3, 6])
       end
     end

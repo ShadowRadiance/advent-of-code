@@ -15,7 +15,7 @@ module AOC
     # computes the shortest distance from starting node
     # to each other node remembering the path that
     # cause that shortest distance
-    def generate_shortest_paths(source)
+    def generate_shortest_paths(source) # rubocop:disable Metrics/MethodLength,Metrics/AbcSize
       distances = Hash.new { Float::INFINITY }
       distances[source] = 0
 
@@ -52,7 +52,7 @@ module AOC
     # computes the shortest distance from starting node
     # to each other node remembering ALL the paths that
     # cause that shortest distance
-    def generate_shortest_multipaths(source)
+    def generate_shortest_multipaths(source) # rubocop:disable Metrics/AbcSize,Metrics/MethodLength
       distances = Hash.new { Float::INFINITY }
       distances[source] = 0
 

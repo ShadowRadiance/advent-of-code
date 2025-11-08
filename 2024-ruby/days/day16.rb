@@ -80,7 +80,7 @@ module Days
         distance
       end
 
-      def num_tiles_in_best_paths
+      def num_tiles_in_best_paths # rubocop:disable Metrics/AbcSize
         pathfinder = AOC::Dijkstra.new(@vertices.keys, @edges)
         result = pathfinder.generate_shortest_multipaths(source_vertex.to_s)
 
@@ -118,7 +118,7 @@ module Days
       end
 
       def build_graph_edges
-        @vertices.each do |_key, source|
+        @vertices.each_value do |source|
           next if ["#", "E"].include?(@grid.value_at(source.location))
 
           TURN_COSTS.each do |method, cost|

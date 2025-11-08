@@ -80,7 +80,7 @@ module AOC
       @rep.pop
       heapify(index)
     end
-    
+
     def heapify(index)
       pindex = parent_index(index)
       if pindex >= 1 && @rep[index] < @rep[pindex]
