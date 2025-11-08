@@ -34,101 +34,46 @@ module Days
       output_buffer.join(",")
     end
 
-    def part_b_old
-      computer, program = parse_input
-      successful_a = nil
-      (1..).each do |initial_a|
-        # puts "Testing A:#{initial_a}"
-        output_buffer = CheckedOutputBuffer.new(desired: program)
-        computer.reset(register_a: initial_a)
-        computer.run(program, output: output_buffer)
-        next unless output_buffer.buffer == program
-
-        successful_a = initial_a
-        break
-      rescue CheckedOutputBuffer::InvalidProgram => _e
-        # puts "InvalidProgram"
-        next
-      end
-      successful_a.to_s
-      # did not complete after 20m
-    end
-
-    def part_b(testing: false)
+    def part_b
       computer, program = parse_input
 
-      # if testing
-      #   # program == [0, 3, 5, 4, 3, 0]
-      #   # ===
-      #   # 0,3: adv C(3) ==> adv 3 ==> A = (A/2**3).to_i
-      #   # 5,4: out C(4) ==> out A ==> OUTPUT A%8
-      #   # 3,0: jnz L(0) ==> jnz 0 ==> IF A!=0 GOTO 0
-      #   #
-      #   # KEY FACTS --> A = A/8 each time
-      #   #           --> 1 OUTPUT PER LOOP
-      #   #           --> WE NEED 6 OUTPUTS
-      #   # INITIAL A MUST BE some_value+(0..7)
-      #   # IT NEEDS TO BE DIVIDED BY 8, 6 TIMES, TO GET TO 0
-      #   # some_value should be 8**6
-      #   # INITIAL A MUST BE 8**6 + (0..7)
-      # else
-      #   # program = 2,4,1,1,7,5,1,5,4,5,0,3,5,5,3,0
-      #   # ===
-      #   # 2,4: bst C(4) ==> bst A ==> B = A%8
-      #   # 1,1: bxl L(1) ==> bxl 1 ==> B = B^00000001
-      #   # 7,5: cdv C(5) ==> cdv B ==> C = (A/2**B).to_i
-      #   # 1,5: bxl L(5) ==> bxl 5 ==> B = B^00000101
-      #   # 4,5: bxc ____ ==> bxc _ ==> B = B^C
-      #   # 0,3: adv C(3) ==> adv 3 ==> A = (A/2**3).to_i
-      #   # 5,5: out C(5) ==> out B ==> OUTPUT B%8
-      #   # 3,0: jnz L(0) ==> jnz 0 ==> IF A!=0 GOTO 0
-      #   #
-      #   # KEY FACTS --> A = A/8 each time
-      #   #           --> 1 OUTPUT PER LOOP
-      #   #           --> WE NEED 16 OUTPUTS
-      #   # INITIAL A MUST BE AT LEAST some_value
-      #   # IT NEEDS TO BE DIVIDED BY 8, 16 TIMES, TO GET TO 0
-      #   # some_value should be 8**16
-      #   # INITIAL A MUST BE 8**16 .. (8**17)-1
-      # end
+      # https://elixirforum.com/t/advent-of-code-2024-day-17/68193/6
+      # The way I solved part 2 is also by noticing that A is right-shifted 3-bits on each iteration.
+      # So, starting at the end of the list I find all initial values of A in 0…7 that produces the
+      # last byte of the program. Then moving up the list to the last 2 bytes, left-shift all the
+      # existing values of A 3-bits, and add in 0…7, and record the list of A’s which produce the
+      # last two bytes. …and so on up to include the whole program. Then take the min of that list.
+      # It executes quite fast.
 
-      lowest = 8**(program.length - 1)
-      highest = (8**program.length) - 1
-      successful_a = nil
+      list_of_initial_a_s = [0]
 
-      (lowest..highest).each do |initial_a|
-        print "."
-        output_buffer = CheckedOutputBuffer.new(desired: program)
-        computer.reset(register_a: initial_a)
-        computer.run(program, output: output_buffer)
-        next unless output_buffer.buffer == program
+      (1..(program.length)).each do |n_cells|
+        expected = program[-n_cells..]
 
-        successful_a = initial_a
-        break
-      rescue CheckedOutputBuffer::InvalidProgram => _e
-        next
+        list_of_initial_a_s = list_of_initial_a_s.flat_map do |base|
+          successes_for_initial_a_base(computer, base, program, n_cells, expected)
+        end
       end
-      successful_a.to_s
-      # did not complete after 1h30m
+
+      list_of_initial_a_s
+        .min
+        .to_s
     end
 
-    class CheckedOutputBuffer
-      class InvalidProgram < RuntimeError; end
+    def successes_for_initial_a_base(computer, base, program, n_cells, expected)
+      (0..7).filter_map do |last_3_bits|
+        initial_a = (base << 3) + last_3_bits
 
-      attr_reader :desired, :buffer
+        successful_run = run_successful?(computer, initial_a, program, n_cells, expected)
 
-      def initialize(desired:)
-        @desired = desired
-        @buffer = []
+        successful_run ? initial_a : nil
       end
+    end
 
-      def <<(value)
-        @buffer << value
-        # puts "Buffer = #{@buffer.join(',')}"
-        invalid = @buffer != @desired[0...@buffer.length]
-        # puts "[#{@buffer.join(',')}] != [#{@desired[0...@buffer.length].join(',')}] == #{invalid}"
-        raise InvalidProgram if invalid
-      end
+    def run_successful?(computer, initial_a, program, n_cells, expected)
+      computer.reset(register_a: initial_a)
+      computer.run(program)
+      computer.output[-n_cells..] == expected
     end
 
     class Computer
