@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
-require_relative "../lib/aoc/dijkstra"
+require_relative "../lib/aoc/graph"
 require_relative "../lib/aoc/direction"
 require_relative "../lib/aoc/edge"
 require_relative "../lib/aoc/grid"
 require_relative "../lib/aoc/location"
+
+require "debug"
 
 module Days
   class Day18
@@ -35,10 +37,27 @@ module Days
       end
 
       def shortest_path_length(source, target)
-        vertices, edges = grid_to_graph(@grid)
-        dijkstra = AOC::Dijkstra.new(vertices.keys, edges)
-        result = dijkstra.generate_shortest_paths(key(source))
-        result.distances[key(target)]
+        graph = grid_to_graph(@grid)
+        graph.dijkstra_shortest_path_length(key(source), key(target))
+      end
+
+      def which_byte_severs_graph(source, target)
+        graph = grid_to_graph(@grid)
+
+        while (byte = @falling_bytes.shift)
+          # puts "Eliminating Vertex #{byte}"
+          graph.eliminate_vertex(key(byte))
+          # SEMI BRUTE FORCE - 28,26 in 1m3s
+          # shortest_length = graph.dijkstra_shortest_path_length(key(source), key(target))
+          # reachable = !shortest_length.nil?
+
+          # since we don't CARE about the shortest... can't we just... check if we can get to the end?
+          reachable = graph.reachable?(key(source), key(target))
+          # puts "#{target} is #{reachable ? 'reachable' : 'not reachable'} from #{source}"
+          return byte unless reachable
+        end
+
+        nil
       end
 
       def grid_to_graph(grid)
@@ -51,7 +70,7 @@ module Days
             edges << AOC::Edge.new(key(location), key(maybe_target)) if grid.value_at(maybe_target) == "."
           end
         end
-        [vertices, edges]
+        AOC::Graph.new(vertices, edges)
       end
 
       def key(location)
@@ -60,7 +79,7 @@ module Days
     end
 
     def part_a(testing: false)
-      # find shortest path after dropping 1024 (or 12 if testing) bytes
+      # find the shortest path after dropping 1024 (or 12 if testing) bytes
       params = setup(testing)
       params.solver.pre_drop(params.drop)
       params.solver.shortest_path_length(params.source, params.target).to_s
@@ -72,7 +91,15 @@ module Days
       params = setup(testing)
       params.solver.pre_drop(params.drop)
 
-      part_b_brute_force(params)
+      # part_b_brute_force(params)
+      # 28,26 in 3m36s
+
+      byte = params.solver.which_byte_severs_graph(params.source, params.target)
+      return "NIL" if byte.nil?
+
+      "#{byte.x},#{byte.y}"
+      # 28,26 in 49s
+      # still slower than I would like, but on to day 19
     end
 
     Params = Data.define(:height, :width, :drop, :solver, :source, :target)
@@ -106,8 +133,6 @@ module Days
         # puts "SPL: #{spl}"
       end
       "#{last_location.x},#{last_location.y}"
-
-      # 28,26 in 3m36s
     end
 
     private
