@@ -13,13 +13,15 @@ module Days
     end
 
     def part_a
+      # How many designs are possible?
       solver = Solver.new(parse_input)
-      solver.possible_design_count
-            .to_s
+      solver.possible_design_count.to_s
     end
 
     def part_b
-      "PENDING_B"
+      # What do you get if you add up the number of different ways you could make each design?
+      solver = Solver.new(parse_input)
+      solver.all_design_variation_count.to_s
     end
 
     class Solver
@@ -30,6 +32,13 @@ module Days
 
       def possible_design_count
         possible_designs.count
+      end
+
+      def all_design_variation_count
+        @tail_cache = {} # a map of tails and the count of make-able variations
+        @desired_designs.sum do |design|
+          num_variations(design) # .tap { puts "\n#{design}: #{it}" }
+        end
       end
 
       def possible_designs
@@ -46,6 +55,25 @@ module Days
         end
 
         false
+      end
+
+      def num_variations(design)
+        return 1 if design.empty?
+
+        cached(design) do
+          total = 0
+          @available_patterns.each do |pattern|
+            next unless design.start_with?(pattern)
+
+            total += num_variations(design[pattern.size..])
+          end
+          total
+        end
+      end
+
+      def cached(design)
+        @tail_cache[design] = yield unless @tail_cache.key?(design)
+        @tail_cache[design]
       end
     end
   end
