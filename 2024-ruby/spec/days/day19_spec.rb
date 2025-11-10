@@ -7,13 +7,42 @@ RSpec.describe "Days::Day19" do
 
   let(:puzzle_input) do
     <<~INPUT
-      placeholder
+      r, wr, b, g, bwu, rb, gb, br
+
+      brwrr
+      bggr
+      gbbr
+      rrbgbr
+      ubwu
+      bwurrg
+      brgr
+      bbrgwb
     INPUT
+  end
+
+  describe "#parse_input" do
+    it "returns an object with available patterns and desired designs" do
+      expect(day_runner.parse_input).to have_attributes(
+        {
+          available_patterns: %w[r wr b g bwu rb gb br],
+          desired_designs: %w[
+            brwrr
+            bggr
+            gbbr
+            rrbgbr
+            ubwu
+            bwurrg
+            brgr
+            bbrgwb
+          ],
+        },
+      )
+    end
   end
 
   describe "#part_a" do
     it "returns the correct value for part A" do
-      expect(day_runner.part_a).to eq "PENDING_A"
+      expect(day_runner.part_a).to eq "6"
     end
   end
 
