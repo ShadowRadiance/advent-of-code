@@ -54,7 +54,7 @@ module AOC
 
     # @param [String] source
     # @param [String] target
-    # @return [String, nil]
+    # @return [Array<String>, nil]
     def dijkstra_shortest_path(source, target)
       dijkstra = AOC::Dijkstra.new(@vertices, @edges)
       result = dijkstra.generate_shortest_paths(source)
