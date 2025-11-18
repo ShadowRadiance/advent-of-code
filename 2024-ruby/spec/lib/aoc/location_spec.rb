@@ -31,5 +31,13 @@ module AOC
         end
       end
     end
+
+    describe "manhattan_distance" do
+      it "returns the manhattan distance to the other location" do
+        location_a = Location.new(x: 5, y: 5)
+        location_b = Location.new(x: 2, y: 3)
+        expect(location_a.manhattan_distance(location_b)).to eq(5)
+      end
+    end
   end
 end

@@ -36,5 +36,11 @@ module AOC
     def cardinally_adjacent?(other)
       horizontally_adjacent?(other) || vertically_adjacent?(other)
     end
+
+    def manhattan_distance(other)
+      raise TypeError unless other.is_a? Location
+
+      (other.x - x).abs + (other.y - y).abs
+    end
   end
 end
