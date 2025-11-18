@@ -44,11 +44,22 @@ module AOC
     end
 
     def path(source, target, parents)
-      return [source] if target == source # base case - found source
-      return nil if parents[target].nil? # no path from target to source
+      return nil if source.nil? || target.nil?
+      return [target] if source == target
 
-      previous_path = path(source, parents[target], parents)
-      previous_path + [target]
+      path = [target]
+      loop do
+        target = parents[target]
+        return nil if target.nil?
+
+        path << target
+        return path.reverse if target == source
+      end
+
+      return nil if parents[target].nil? # no path back to source
+      return path if parents[target] == source
+
+      nil
     end
 
     # computes the shortest distance from starting node
