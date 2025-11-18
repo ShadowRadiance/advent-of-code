@@ -1,0 +1,36 @@
+# frozen_string_literal: true
+
+require_relative "../../days/day08"
+
+RSpec.describe "Days::Day08" do
+  let(:day_runner) { Days::Day08.new(puzzle_input) }
+
+  let(:puzzle_input) do
+    <<~INPUT
+      ............
+      ........0...
+      .....0......
+      .......0....
+      ....0.......
+      ......A.....
+      ............
+      ............
+      ........A...
+      .........A..
+      ............
+      ............
+    INPUT
+  end
+
+  describe "#part_a" do
+    it "returns the correct value for part A" do
+      expect(day_runner.part_a).to eq "14"
+    end
+  end
+
+  describe "#part_b" do
+    it "returns the correct value for part B" do
+      expect(day_runner.part_b).to eq "34"
+    end
+  end
+end

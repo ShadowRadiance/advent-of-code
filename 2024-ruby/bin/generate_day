@@ -1,0 +1,18 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require_relative "../support/aoc"
+require_relative "../support/day_generator"
+
+def parse_day(args)
+  args.first
+      .tap { |d| raise "Missing day number" if d.nil? }
+      .to_i
+      .tap { |d| raise "Day must be between 1 and 25" unless (1..25).cover?(d) }
+end
+
+Support::DayGenerator.new(
+  aoc: Support::AOC.new(base_path: File.dirname(__dir__)),
+  year: 2024,
+  day: parse_day(ARGV),
+).generate

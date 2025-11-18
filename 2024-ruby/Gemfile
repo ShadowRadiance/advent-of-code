@@ -1,0 +1,14 @@
+# frozen_string_literal: true
+
+source "https://rubygems.org"
+
+gem "matrix"
+
+group :development do
+  gem "debug"
+  gem "rerun"
+  gem "rspec"
+  gem "rspec-pride"
+  gem "rubocop"
+  gem "rubocop-rspec"
+end
