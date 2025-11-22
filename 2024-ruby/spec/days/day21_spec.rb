@@ -21,9 +21,9 @@ RSpec.describe "Days::Day21" do
     end
   end
 
-  describe "#part_b" do
-    it "returns the correct value for part B" do
-      expect(day_runner.part_b).to eq "PENDING_B"
-    end
-  end
+  # describe "#part_b" do
+  #   it "returns the correct value for part B" do
+  #     expect(day_runner.part_b).to eq "PENDING_B"
+  #   end
+  # end
 end

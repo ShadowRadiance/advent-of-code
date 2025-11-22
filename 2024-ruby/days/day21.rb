@@ -7,23 +7,31 @@ module Days
     end
 
     def part_a
-      Solver.new(@puzzle_input)
+      Solver.new(@puzzle_input, number_of_controller_pad_bots: 2)
             .sum_of_code_complexities
             .to_s
       # 156714 in 5s
+      # Not great - implies we're missing something
     end
 
     def part_b
-      "PENDING_B"
+      # Trying to use the existing solver as is with more bots
+      # does not complete
+      # Solver.new(@puzzle_input, number_of_controller_pad_bots: 25)
+      #       .sum_of_code_complexities
+      #       .to_s
+      0
     end
 
     class Solver
-      def initialize(puzzle_input)
+      def initialize(puzzle_input, number_of_controller_pad_bots: 2)
         @codes = puzzle_input.lines(chomp: true)
 
-        @butn_bot = Robot.new(NUMBER_PAD_ROBOT_INSTRUCTIONS)
-        @depr_bot = Robot.new(CONTROLLER_PAD_ROBOT_INSTRUCTIONS)
-        @radi_bot = Robot.new(CONTROLLER_PAD_ROBOT_INSTRUCTIONS)
+        butn_bot = Robot.new(NUMBER_PAD_ROBOT_INSTRUCTIONS)
+        controller_pad_bots = Array.new(number_of_controller_pad_bots) do
+          Robot.new(CONTROLLER_PAD_ROBOT_INSTRUCTIONS)
+        end
+        @bots = [butn_bot] + controller_pad_bots
       end
 
       def sum_of_code_complexities
@@ -31,20 +39,16 @@ module Days
       end
 
       def complexity(code)
-        numeric(code) * shortest_path_length(
-          code: code,
-          bots: [@radi_bot, @depr_bot, @butn_bot],
-        )
+        numeric(code) * shortest_path_length(code)
       end
 
       def numeric(code)
         code.gsub(/^0+/, "").gsub(/A$/, "").to_i
       end
 
-      def shortest_path_length(code:, bots:)
+      def shortest_path_length(code)
         codes = [code]
-        until bots.empty?
-          bot = bots.pop
+        @bots.each do |bot|
           codes = codes.flat_map { |code| bot.all_translations(code) }
           shortest = codes.min_by(&:length).length
           codes = codes.reject { |t| t.length > shortest }
