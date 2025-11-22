@@ -12,6 +12,7 @@ module Days
             .to_s
       # 156714 in 5s
       # 156714 in 0.5s after removing moves that cost more next time
+      # 156714 in 0.05s after adding cache
     end
 
     def part_b
@@ -25,17 +26,20 @@ module Days
             .to_s
       # Fewer turns preference - still DNC
       # LUDR preference - still DNC
+      # caching per "command step"
+      # 191139369248202 after 0.05s
     end
 
     class Solver
       def initialize(puzzle_input, number_of_controller_pad_bots: 2)
         @codes = puzzle_input.lines(chomp: true)
+        @number_of_controller_pad_bots = number_of_controller_pad_bots
 
-        butn_bot = Robot.new(NUMBER_PAD_ROBOT_INSTRUCTIONS)
-        controller_pad_bots = Array.new(number_of_controller_pad_bots) do
-          Robot.new(CONTROLLER_PAD_ROBOT_INSTRUCTIONS)
-        end
-        @bots = [butn_bot] + controller_pad_bots
+        @number_pad_bot = Robot.new(NUMBER_PAD_ROBOT_INSTRUCTIONS)
+        @controller_bot = Robot.new(CONTROLLER_PAD_ROBOT_INSTRUCTIONS)
+
+        # @type [Hash<String,Array<Integer>>] @cache
+        @cache = {}
       end
 
       def sum_of_code_complexities
@@ -50,14 +54,45 @@ module Days
         code.gsub(/^0+/, "").gsub(/A$/, "").to_i
       end
 
-      def shortest_path_length(code)
-        codes = [code]
-        @bots.each do |bot|
-          codes = codes.flat_map { |code| bot.all_translations(code) }
-          shortest = codes.min_by(&:length).length
-          codes = codes.reject { |t| t.length > shortest }
+      # Inspired by bytesizego
+      # https://www.bytesizego.com/blog/aoc-day21-golang
+      def count_after_n_robots(code, max_bots, curr_bot)
+        @cache[code] ||= Array.new(@number_of_controller_pad_bots, 0)
+        cache_for_code = @cache[code]
+
+        return @cache[code][curr_bot - 1] if cache_for_code[curr_bot - 1] != 0
+
+        next_code = @controller_bot.only_translation(code)
+        cache_for_code[0] = next_code.length
+        return next_code.length if curr_bot == max_bots
+
+        count = 0
+        steps(next_code).each do |step_code|
+          c = count_after_n_robots(step_code, max_bots, curr_bot + 1)
+          @cache[step_code] ||= Array.new(@number_of_controller_pad_bots, 0)
+          @cache[step_code][0] = c
+          count += c
         end
-        codes&.at(0)&.length
+        cache_for_code[curr_bot - 1] = count
+
+        count
+      end
+
+      # split code string into substrings ending at each "A"
+      def steps(code)
+        regex = /([^A]*A)/
+        output = []
+        m = regex.match(code, 0)
+        until m.nil?
+          output << m[1]
+          m = regex.match(code, m.end(1))
+        end
+        output
+      end
+
+      def shortest_path_length(code)
+        initial = @number_pad_bot.only_translation(code)
+        count_after_n_robots(initial, @number_of_controller_pad_bots, 1)
       end
 
       class Robot
@@ -67,6 +102,17 @@ module Days
 
         def instructions(from:, to:)
           @instruction_set[from][to]
+        end
+
+        def only_translation(code)
+          result = +""
+          code.chars.each_with_index do |char, index|
+            result << instructions(
+              from: index.zero? ? "A" : code[index - 1],
+              to: char,
+            ).first
+          end
+          result
         end
 
         # @param [String] code
