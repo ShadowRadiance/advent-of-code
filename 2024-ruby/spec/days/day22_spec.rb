@@ -45,24 +45,33 @@ RSpec.describe "Days::Day22" do
   describe "Main Problem" do
     let(:day_runner) { Days::Day22.new(puzzle_input) }
 
-    let(:puzzle_input) do
-      <<~INPUT
-        1
-        10
-        100
-        2024
-      INPUT
-    end
-
     describe "#part_a" do
+      let(:puzzle_input) do
+        <<~INPUT
+          1
+          10
+          100
+          2024
+        INPUT
+      end
+
       it "returns the correct value for part A" do
         expect(day_runner.part_a).to eq "37327623"
       end
     end
 
     describe "#part_b" do
+      let(:puzzle_input) do
+        <<~INPUT
+          1
+          2
+          3
+          2024
+        INPUT
+      end
+
       it "returns the correct value for part B" do
-        expect(day_runner.part_b).to eq "PENDING_B"
+        expect(day_runner.part_b).to eq "23"
       end
     end
   end

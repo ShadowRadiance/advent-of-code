@@ -4,6 +4,12 @@ plugins:
 AllCops:
   NewCops: enable
 
+Lint/UselessAssignment:
+  Enabled: false
+
+Naming/VariableNumber:
+  EnforcedStyle: snake_case
+
 Metrics/AbcSize:
   CountRepeatedAttributes: false
 Metrics/BlockLength:
