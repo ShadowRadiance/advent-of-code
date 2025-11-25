@@ -50,6 +50,7 @@ module Days
       # a set of vertices that are all directly connected to each other (adjacent)
       # is called a clique
       lan_password(maximum_clique(edges: parse_input))
+      # "ar,ep,ih,ju,jx,le,ol,pk,pm,pp,xf,yu,zg" in 2.36s
     end
 
     def count_triplets(edges:, including:)
