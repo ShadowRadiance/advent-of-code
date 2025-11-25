@@ -9,6 +9,25 @@ module Days
     Edge = Data.define(:lft, :rgt)
 
     # @return [Hash<String, Array<String>]
+    # @example Return Value
+    #   {
+    #     "aq" => ["yn", "vc", "cg", "wq"],
+    #     "cg" => ["de", "tb", "yn", "aq"],
+    #     "co" => ["ka", "ta", "de", "tc"],
+    #     "de" => ["cg", "co", "ta", "ka"],
+    #     "ka" => ["co", "tb", "ta", "de"],
+    #     "kh" => ["tc", "qp", "ub", "ta"],
+    #     "qp" => ["kh", "ub", "td", "wh"],
+    #     "ta" => ["co", "ka", "de", "kh"],
+    #     "tb" => ["cg", "ka", "wq", "vc"],
+    #     "tc" => ["kh", "wh", "td", "co"],
+    #     "td" => ["tc", "wh", "qp", "yn"],
+    #     "ub" => ["qp", "kh", "wq", "vc"],
+    #     "vc" => ["aq", "ub", "wq", "tb"],
+    #     "wh" => ["tc", "td", "yn", "qp"],
+    #     "wq" => ["tb", "ub", "aq", "vc"],
+    #     "yn" => ["aq", "cg", "wh", "td"],
+    #   }
     def parse_input
       edges = Hash.new { |hash, key| hash[key] = [] }
       @puzzle_input.lines(chomp: true).each do |line|
@@ -20,34 +39,18 @@ module Days
     end
 
     def part_a
-      edges = parse_input
-      # {
-      #   "aq" => ["yn", "vc", "cg", "wq"],
-      #   "cg" => ["de", "tb", "yn", "aq"],
-      #   "co" => ["ka", "ta", "de", "tc"],
-      #   "de" => ["cg", "co", "ta", "ka"],
-      #   "ka" => ["co", "tb", "ta", "de"],
-      #   "kh" => ["tc", "qp", "ub", "ta"],
-      #   "qp" => ["kh", "ub", "td", "wh"],
-      #   "ta" => ["co", "ka", "de", "kh"],
-      #   "tb" => ["cg", "ka", "wq", "vc"],
-      #   "tc" => ["kh", "wh", "td", "co"],
-      #   "td" => ["tc", "wh", "qp", "yn"],
-      #   "ub" => ["qp", "kh", "wq", "vc"],
-      #   "vc" => ["aq", "ub", "wq", "tb"],
-      #   "wh" => ["tc", "td", "yn", "qp"],
-      #   "wq" => ["tb", "ub", "aq", "vc"],
-      #   "yn" => ["aq", "cg", "wh", "td"],
-      # }
-
-      starts = edges.keys.select { |k| k[0] == "t" }
-      triplets = starts.flat_map { |start| sorted_triplets_from(start, edges) }.uniq
-      triplets.size.to_s
+      count_triplets(edges: parse_input, including: /^t.$/)
       # 1098 in 0.05s
     end
 
     def part_b
       "PENDING_B"
+    end
+
+    def count_triplets(edges:, including:)
+      starts = edges.keys.select { |k| k =~ including }
+      triplets = starts.flat_map { |start| sorted_triplets_from(start, edges) }.uniq
+      triplets.size.to_s
     end
 
     def sorted_triplets_from(first, edges)
