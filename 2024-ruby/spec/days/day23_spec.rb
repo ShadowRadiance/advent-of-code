@@ -50,7 +50,7 @@ RSpec.describe "Days::Day23" do
 
   describe "#part_b" do
     it "returns the correct value for part B" do
-      expect(day_runner.part_b).to eq "PENDING_B"
+      expect(day_runner.part_b).to eq "co,de,ka,ta"
     end
   end
 end

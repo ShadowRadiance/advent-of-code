@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require_relative "../lib/aoc/edge"
+require_relative "../lib/aoc/graph"
+
 module Days
   class Day23
     def initialize(puzzle_input)
@@ -44,7 +47,9 @@ module Days
     end
 
     def part_b
-      "PENDING_B"
+      # a set of vertices that are all directly connected to each other (adjacent)
+      # is called a clique
+      lan_password(maximum_clique(edges: parse_input))
     end
 
     def count_triplets(edges:, including:)
@@ -71,6 +76,17 @@ module Days
         end
       end
       triplets.map(&:sort).uniq
+    end
+
+    def lan_password(list)
+      list.sort.join(",")
+    end
+
+    def maximum_clique(edges:)
+      vertices = edges.keys
+      graph_edges = edges.flat_map { |source, list| list.map { |target| AOC::Edge.new(source, target) } }
+      graph = AOC::Graph.new(vertices, graph_edges)
+      graph.maximal_cliques.max_by(&:length)
     end
   end
 end
