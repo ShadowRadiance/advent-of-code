@@ -17,6 +17,14 @@ module AOC
       "Grid:\n#{@matrix.map { it.join(' ') }.join("\n")}"
     end
 
+    def column(nnn)
+      @matrix.map { |row| row[nnn] }
+    end
+
+    def row(nnn)
+      @matrix[nnn].dup
+    end
+
     def to_s
       inspect
     end
