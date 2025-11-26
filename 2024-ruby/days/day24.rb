@@ -107,39 +107,36 @@ module Days
         @input_wires = {}
 
         gates.each do |gate|
-          keys = @wires.keys
-
-          # initialize the wires that weren't mentioned in the parameters
-          gate.input_wires.each do |wire_id|
-            @wires[wire_id] = nil unless keys.include?(wire_id)
-          end
-          @wires[gate.output_wire] = nil unless keys.include?(gate.output_wire)
-
-          # record each input_wire -> gate relationship
-          gate.input_wires.each do |wire_id|
-            @input_wires[wire_id] ||= []
-            @input_wires[wire_id] << gate
-          end
-
-          # record the output_wire -> gate relationship
-          @gates_by_output_wire[gate.output_wire] = gate
+          initialize_unmentioned_wires(gate)
+          initialize_wire_gate_relationships(gate)
         end
+      end
+
+      def initialize_unmentioned_wires(gate)
+        gate.input_wires.each do |wire_id|
+          @wires[wire_id] = nil unless @wires.keys.include?(wire_id)
+        end
+        @wires[gate.output_wire] = nil unless @wires.keys.include?(gate.output_wire)
+      end
+
+      def initialize_wire_gate_relationships(gate)
+        gate.input_wires.each do |wire_id|
+          @input_wires[wire_id] ||= []
+          @input_wires[wire_id] << gate
+        end
+        @gates_by_output_wire[gate.output_wire] = gate
       end
 
       def pull_z
         z_wire_ids.each { |z_wire_id| evaluate_wire(z_wire_id) }
       end
 
-      def gate_outputting_to(wire_id)
-        @gates_by_output_wire[wire_id]
-      end
-
       def evaluate_wire(wire_id)
-        @wires[wire_id] = evaluate_gate(gate_outputting_to(wire_id)) if @wires[wire_id].nil?
+        @wires[wire_id] = evaluate_gate(@gates_by_output_wire[wire_id]) if @wires[wire_id].nil?
         @wires[wire_id]
       end
 
-      def evaluate_gate(gate)
+      def evaluate_gate(gate) # rubocop:disable Metrics/AbcSize
         gate.output ||= case gate.operation
                         when "AND"
                           evaluate_wire(gate.input_wires[0]) & evaluate_wire(gate.input_wires[1])
@@ -168,42 +165,49 @@ module Days
       end
 
       def validate_ripple_carry_adder_rules
+        validator = RippleCarryAdderRuleValidator.new(
+          @gates,
+          @input_wires,
+          z_wire_ids,
+        )
+        validator.faulty_wires
+      end
+    end
+
+    class RippleCarryAdderRuleValidator
+      def initialize(gates, input_wires, z_wire_ids)
+        @fault_tests = %i[
+          test_1_failed?
+          test_2_failed?
+          test_3_failed?
+          test_4_failed?
+        ]
+        @gates = gates
+        @z_wire_ids = z_wire_ids
+        @input_wires = input_wires
+      end
+
+      def faulty_wires
         faulty = []
         @gates.each do |gate|
-          if test_1_failed?(gate)
-            faulty << gate.output_wire
-            next
-          end
-
-          if test_2_failed?(gate)
-            faulty << gate.output_wire
-            next
-          end
-
-          if test_3_failed?(gate)
-            faulty << gate.output_wire
-            next
-          end
-
-          if test_4_failed?(gate)
+          if @fault_tests.any? { |method| send(method, gate) }
             faulty << gate.output_wire
             next
           end
         end
-
         faulty
       end
 
       def test_1_failed?(gate)
         # If the output of a gate is a zNN, then the operation has to be XOR unless it is the last bit.
-        z_hi_bit_wire_id = z_wire_ids.first
+        z_hi_bit_wire_id = @z_wire_ids.first
 
         z_wire?(gate.output_wire) &&
           gate.operation != "XOR" &&
           gate.output_wire != z_hi_bit_wire_id
       end
 
-      def test_2_failed?(gate)
+      def test_2_failed?(gate) # rubocop:disable Metrics/AbcSize
         # If the output of a gate is not z and the inputs are not x, y then it has to be AND / OR, but not XOR.
         !z_wire?(gate.output_wire) &&
           !x_wire?(gate.input_wires[0]) && !y_wire?(gate.input_wires[0]) &&
@@ -213,7 +217,8 @@ module Days
 
       def test_3_failed?(gate)
         # If you have a XOR gate with inputs x, y, there must be another XOR gate with this gate as an input.
-        # Search through all gates for an XOR-gate with this gate as an input; if it does not exist, your (original) XOR gate is faulty.
+        # Search through all gates for an XOR-gate with this gate as an input;
+        #   if it does not exist, your (original) XOR gate is faulty.
         return false unless test_3_gate?(gate)
 
         return true unless @input_wires.key?(gate.output_wire)
@@ -229,7 +234,7 @@ module Days
         !valid
       end
 
-      def test_3_gate?(gate)
+      def test_3_gate?(gate) # rubocop:disable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
         # an XOR gate with inputs x, y
         a = gate.input_wires[0]
         b = gate.input_wires[1]
@@ -256,7 +261,7 @@ module Days
         !valid
       end
 
-      def test_4_gate?(gate)
+      def test_4_gate?(gate) # rubocop:disable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
         a = gate.input_wires[0]
         b = gate.input_wires[1]
 
