@@ -14,7 +14,29 @@ module Days
     end
 
     def part_b
-      "PENDING_B"
+      # system is trying to
+      # treat the X-bits as one number (x00 is LSB)
+      #   and the Y-bits as one number (y00 is LSB)
+      #   and add those two numbers together
+      #    to output to Z-bits (z00 is LSB)
+      # it doesn't work because some gates' output wires were swapped
+      #
+      # ** exactly four pairs of gates had output wires swapped
+      # ** a gate can only be in at most one such pair
+      #
+      # DETERMINE THE FOUR SWAPPED OUTPUT WIRES
+      # (AND THE FOUR WIRES WITH WHICH THEY WERE SWAPPED)
+      # SORT THE WIRES BY NAME AND OUTPUT THEM JOINED WITH COMMAS
+      #
+      # There are 222 gates in the LIVE data
+      # first choose 2 from 222 (222C2=24531)
+      #  then choose 2 from 220 (220C2=24090)
+      #  then choose 2 from 218 (218C2=23653)
+      #  then choose 2 from 216 (216C2=23220)
+      # ==> 24531*24090*23653*23220
+      # ==> 324_564_114_035_561_400 variations
+      # Brute force is *probably* not a great approach
+      sys = System.new(**parse_input)
     end
 
     Gate = Struct.new(:operation, :input_wires, :output_wire, :output, keyword_init: true)
@@ -48,7 +70,7 @@ module Days
     end
 
     class System
-      attr_reader :wires
+      attr_reader :wires, :gates
 
       # @param [Hash<String, Integer>] wires The initial values on each wire
       # @param [Array<Gate>] gates A list of gates connecting a pair of input wires to an output wire
