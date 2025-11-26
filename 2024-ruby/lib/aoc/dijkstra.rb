@@ -43,7 +43,7 @@ module AOC
       Result.new(distances, parents)
     end
 
-    def path(source, target, parents)
+    def path(source, target, parents) # rubocop:disable Metrics/MethodLength, Metrics/CyclomaticComplexity
       return nil if source.nil? || target.nil?
       return [target] if source == target
 

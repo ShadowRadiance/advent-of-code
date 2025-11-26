@@ -1,11 +1,12 @@
 # frozen_string_literal: true
 
+require_relative "bron_kerbosch"
 require_relative "dijkstra"
 require_relative "priority_queue"
 
 module AOC
   class Graph
-    # @param [Set<String>, Array<String>] vertices
+    # @param [Set<String|Integer>, Array<String|Integer>] vertices
     # @param [Array<Edge>] edges
     def initialize(vertices, edges)
       @vertices = Set.new(vertices)
@@ -38,6 +39,10 @@ module AOC
         visited << vertex
       end
       false
+    end
+
+    def neighbours(vertex)
+      @out_edges_by_source[vertex].map(&:target).uniq
     end
 
     # @param [String] source
@@ -74,6 +79,11 @@ module AOC
         dijkstra.path(source, target, result.parents),
         distance,
       ]
+    end
+
+    def maximal_cliques
+      bk = BronKerbosch.new(potential: @vertices.dup, graph: self)
+      bk.evaluate
     end
   end
 end

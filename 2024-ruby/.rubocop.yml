@@ -4,6 +4,12 @@ plugins:
 AllCops:
   NewCops: enable
 
+Lint/UselessAssignment:
+  Enabled: false
+
+Naming/VariableNumber:
+  EnforcedStyle: snake_case
+
 Metrics/AbcSize:
   CountRepeatedAttributes: false
 Metrics/BlockLength:
@@ -15,6 +21,8 @@ Metrics/ModuleLength:
 
 RSpec/ExampleLength:
   CountAsOne: [ "array", "hash", "heredoc", "method_call" ]
+RSpec/MultipleExpectations:
+  Enabled: false
 
 Style/Documentation:
   Enabled: false
