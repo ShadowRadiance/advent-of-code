@@ -18,7 +18,7 @@ class BronKerbosch
 
   private
 
-  def recursive(results:, potentials:, excluded:)
+  def recursive(results:, potentials:, excluded:) # rubocop:disable Metrics/MethodLength
     if potentials.empty? && excluded.empty?
       @maximal_cliques << results
     else

@@ -54,7 +54,7 @@ module Days
     end
 
     def count_triplets(edges:, including:)
-      starts = edges.keys.select { |k| k =~ including }
+      starts = edges.keys.grep(including)
       triplets = starts.flat_map { |start| sorted_triplets_from(start, edges) }.uniq
       triplets.size.to_s
     end

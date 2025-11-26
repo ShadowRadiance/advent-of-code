@@ -12,6 +12,6 @@ module AOC
        Edge.new(3, 4),]
     end
 
-    # it { is_expected.to be_a(Graph) }
+    it { is_expected.to be_a(Graph) }
   end
 end

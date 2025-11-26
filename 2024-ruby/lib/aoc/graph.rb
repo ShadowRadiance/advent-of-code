@@ -6,7 +6,7 @@ require_relative "priority_queue"
 
 module AOC
   class Graph
-    # @param [Set<String>, Array<String>] vertices
+    # @param [Set<String|Integer>, Array<String|Integer>] vertices
     # @param [Array<Edge>] edges
     def initialize(vertices, edges)
       @vertices = Set.new(vertices)

@@ -2,6 +2,7 @@
 
 require_relative "../map"
 
+# rubocop:disable Naming/VariableNumber
 module Days
   class Day06
     module Variants
@@ -22,3 +23,4 @@ module Days
     end
   end
 end
+# rubocop:enable Naming/VariableNumber

@@ -30,7 +30,7 @@ module Days
       # 191139369248202 after 0.05s
     end
 
-    class Solver
+    class Solver # rubocop:disable Metrics/ClassLength
       def initialize(puzzle_input, number_of_controller_pad_bots: 2)
         @codes = puzzle_input.lines(chomp: true)
         @number_of_controller_pad_bots = number_of_controller_pad_bots
@@ -56,7 +56,7 @@ module Days
 
       # Inspired by bytesizego
       # https://www.bytesizego.com/blog/aoc-day21-golang
-      def count_after_n_robots(code, max_bots, curr_bot)
+      def count_after_n_robots(code, max_bots, curr_bot) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
         @cache[code] ||= Array.new(@number_of_controller_pad_bots, 0)
         cache_for_code = @cache[code]
 

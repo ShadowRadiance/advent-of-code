@@ -73,7 +73,7 @@ module Days
         directions.filter_map do |direction|
           next unless wall?(location + direction)
 
-          index_of_location_in_path = @no_cheat_path.index((location + x2(direction)).to_s)
+          index_of_location_in_path = @no_cheat_path.index((location + double(direction)).to_s)
           next if index_of_location_in_path.nil? || index_of_location_in_path <= current_index
 
           savings(current_index, index_of_location_in_path)
@@ -84,7 +84,7 @@ module Days
         (skip_to_index - skip_from_index) - 2
       end
 
-      def x2(direction)
+      def double(direction)
         double_directions[direction]
       end
 
