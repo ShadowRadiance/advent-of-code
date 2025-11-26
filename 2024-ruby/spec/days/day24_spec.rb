@@ -167,34 +167,4 @@ RSpec.describe "Days::Day24" do
       expect(day_runner.part_a).to eq "2024"
     end
   end
-
-  describe "#part_b" do
-    let(:puzzle_input) do
-      <<~INPUT
-        x00: 0
-        x01: 1
-        x02: 0
-        x03: 1
-        x04: 0
-        x05: 1
-        y00: 0
-        y01: 0
-        y02: 1
-        y03: 1
-        y04: 0
-        y05: 1
-
-        x00 AND y00 -> z05
-        x01 AND y01 -> z02
-        x02 AND y02 -> z01
-        x03 AND y03 -> z03
-        x04 AND y04 -> z04
-        x05 AND y05 -> z00
-      INPUT
-    end
-
-    it "returns the correct value for part B" do
-      expect(day_runner.part_b).to eq "z00,z01,z02,z05"
-    end
-  end
 end

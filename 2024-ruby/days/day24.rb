@@ -36,7 +36,33 @@ module Days
       # ==> 24531*24090*23653*23220
       # ==> 324_564_114_035_561_400 variations
       # Brute force is *probably* not a great approach
+      #
+      # Since we know the desired output (X+Y),
+      #   we can maybe test for which Z bits are incorrect
+      #   to narrow down the bad outputs
+
+      # https://blog.jverkamp.com/2024/12/24/aoc-2024-day-24-ripple-carrinator/
+      # has a lovely explanation of the way each set should be essentially the same
+      # to implement a "ripple carry adder", and if you output the graph with GraphViz
+      # you can see where it isn't and that all the swaps are "local"
+      # ==> So what we need to is basically go through each bit, build what the
+      # ==> structure should be, and check that we have that!
+      #
+      # https://www.bytesizego.com/blog/aoc-day24-golang
+      # also has a nice explanation (referencing *another* post)
+      # https://www.reddit.com/r/adventofcode/comments/1hla5ql/2024_day_24_part_2_a_guide_on_the_idea_behind_the/
+      # that helps find the rules for finding the bad wires in a "ripple carry adder"
+      #
+      # 1. if the gate outputs to Z, the operation must be XOR (unless it is the last Z-bit)
+      # 2. if the gate outputs to anything but Z, and the inputs are not X,Y, then it must be AND or OR but not XOR
+      # 3. if an XOR gate has inputs X,Y, it must output to a wire that is input to another XOR gate
+      # 4. if an AND gate, it must output to a wire that is input to an OR gate
+      #
+      # We'll reimplement the www.bytesizego.com version for part b
+
       sys = System.new(**parse_input)
+      faulty = sys.validate_ripple_carry_adder_rules
+      faulty.sort.join(",")
     end
 
     Gate = Struct.new(:operation, :input_wires, :output_wire, :output, keyword_init: true)
@@ -77,17 +103,26 @@ module Days
       def initialize(wires:, gates:)
         @wires = wires # initialized wires
         @gates = gates
-        @wire_inputs = {}
+        @gates_by_output_wire = {}
+        @input_wires = {}
+
         gates.each do |gate|
           keys = @wires.keys
 
           # initialize the wires that weren't mentioned in the parameters
-          [gate.output_wire, *gate.input_wires].each do |wire_id|
+          gate.input_wires.each do |wire_id|
             @wires[wire_id] = nil unless keys.include?(wire_id)
+          end
+          @wires[gate.output_wire] = nil unless keys.include?(gate.output_wire)
+
+          # record each input_wire -> gate relationship
+          gate.input_wires.each do |wire_id|
+            @input_wires[wire_id] ||= []
+            @input_wires[wire_id] << gate
           end
 
           # record the output_wire -> gate relationship
-          @wire_inputs[gate.output_wire] = gate
+          @gates_by_output_wire[gate.output_wire] = gate
         end
       end
 
@@ -96,7 +131,7 @@ module Days
       end
 
       def gate_outputting_to(wire_id)
-        @wire_inputs[wire_id]
+        @gates_by_output_wire[wire_id]
       end
 
       def evaluate_wire(wire_id)
@@ -130,6 +165,116 @@ module Days
 
       def z_wire_ids
         @z_wire_ids ||= @wires.keys.grep(/z\d\d/).sort.reverse
+      end
+
+      def validate_ripple_carry_adder_rules
+        faulty = []
+        @gates.each do |gate|
+          if test_1_failed?(gate)
+            faulty << gate.output_wire
+            next
+          end
+
+          if test_2_failed?(gate)
+            faulty << gate.output_wire
+            next
+          end
+
+          if test_3_failed?(gate)
+            faulty << gate.output_wire
+            next
+          end
+
+          if test_4_failed?(gate)
+            faulty << gate.output_wire
+            next
+          end
+        end
+
+        faulty
+      end
+
+      def test_1_failed?(gate)
+        # If the output of a gate is a zNN, then the operation has to be XOR unless it is the last bit.
+        z_hi_bit_wire_id = z_wire_ids.first
+
+        z_wire?(gate.output_wire) &&
+          gate.operation != "XOR" &&
+          gate.output_wire != z_hi_bit_wire_id
+      end
+
+      def test_2_failed?(gate)
+        # If the output of a gate is not z and the inputs are not x, y then it has to be AND / OR, but not XOR.
+        !z_wire?(gate.output_wire) &&
+          !x_wire?(gate.input_wires[0]) && !y_wire?(gate.input_wires[0]) &&
+          !x_wire?(gate.input_wires[1]) && !y_wire?(gate.input_wires[1]) &&
+          gate.operation == "XOR"
+      end
+
+      def test_3_failed?(gate)
+        # If you have a XOR gate with inputs x, y, there must be another XOR gate with this gate as an input.
+        # Search through all gates for an XOR-gate with this gate as an input; if it does not exist, your (original) XOR gate is faulty.
+        return false unless test_3_gate?(gate)
+
+        return true unless @input_wires.key?(gate.output_wire)
+
+        valid = false
+        @input_wires[gate.output_wire].each do |poss_gate|
+          if poss_gate.operation == "XOR"
+            valid = true
+            break
+          end
+        end
+
+        !valid
+      end
+
+      def test_3_gate?(gate)
+        # an XOR gate with inputs x, y
+        a = gate.input_wires[0]
+        b = gate.input_wires[1]
+        gate.operation == "XOR" &&
+          ((x_wire?(a) && y_wire?(b)) || (y_wire?(a) && x_wire?(b))) &&
+          a != "x00" && b != "x00" && a != "y00" && b != "y00"
+      end
+
+      def test_4_failed?(gate)
+        # if you have an AND-gate, there must be an OR-gate with this gate as an input.
+        # if that gate doesn't exist, the original AND gate is faulty.
+        return false unless test_4_gate?(gate)
+
+        return true unless @input_wires.key?(gate.output_wire)
+
+        valid = false
+        @input_wires[gate.output_wire].each do |poss_gate|
+          if poss_gate.operation == "ORR"
+            valid = true
+            break
+          end
+        end
+
+        !valid
+      end
+
+      def test_4_gate?(gate)
+        a = gate.input_wires[0]
+        b = gate.input_wires[1]
+
+        gate.operation == "AND" &&
+          ((x_wire?(a) && y_wire?(b)) || (y_wire?(a) && x_wire?(b))) &&
+          a != "x00" && b != "x00" && a != "y00" && b != "y00"
+      end
+
+      def z_wire?(wire_id)
+        wire_id[0] == "z"
+      end
+
+      def y_wire?(wire_id)
+        wire_id[0] == "y"
+      end
+
+      def x_wire?(wire_id)
+        wire_id[0] == "x"
       end
     end
   end
