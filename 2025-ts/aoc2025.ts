@@ -19,7 +19,7 @@ function aoc2025(day: number, part: number): string {
     const result: string = aoc2025(day, part);
     console.log(`AOC 2025 Day ${day} Part ${part}: ${result}`);
   } catch (e) {
-    console.log(e);
+    console.log((e as Error).message);
     console.log("Run aoc2025 <day:1-12> <part:1-2>");
   }
 })();
