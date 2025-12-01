@@ -28,6 +28,24 @@
 // Analyze the rotations in your attached document. What's the actual password
 // to open the door?
 
-export function part_1(_input: string): string {
-  return "PENDING";
+export function part_1(input: string): string {
+  const lines = input.split("\n");
+
+  const instructions = lines.map((line) => {
+    const direction = line.charAt(0);
+    const amount = Number.parseInt(line.substring(1));
+    return { direction: direction, amount: amount };
+  });
+
+  let current = 50;
+  let zeros = 0;
+  instructions.forEach(({ direction, amount }) => {
+    if (direction === "L") amount = -amount;
+    current += amount;
+    while (current < 0) current = current + 100;
+    while (current > 99) current = current - 100;
+    if (current === 0) zeros += 1;
+  });
+
+  return `${zeros}`;
 }
