@@ -6,6 +6,7 @@ Parent repo for all my [Advent of Code](https://adventofcode.com/) shenanigans.
 - `2022` I decided to use "modern c++" using only the STL to reacquaint myself with C++ after not using it since about C++11.
 - `2023` I decided to learn Go by doing AoC in Go this year.
 - `2024` Ruby again
+- `2025` Typescript via Deno ([branch](https://github.com/ShadowRadiance/advent-of-code/tree/2025-ts))
 
 ## Backfill:
 
