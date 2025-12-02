@@ -2,9 +2,11 @@ import { MissingDayError } from "../errors/missingDayError.ts";
 import { MissingPartError } from "../errors/missingPartError.ts";
 import { MissingDataError } from "../errors/missingDataError.ts";
 import * as day01 from "./day01/index.ts";
+import * as day02 from "./day02/index.ts";
 
 const dispatcher: ((data: string) => string)[][] = [
   [day01.part_1, day01.part_2],
+  [day02.part_1, day02.part_2],
 ];
 
 function dualNumber(input: number): string {
