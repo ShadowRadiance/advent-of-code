@@ -50,10 +50,37 @@
 //
 // What do you get if you add up all of the invalid IDs?
 
-export function part_1(_input: string): string {
-  return ``;
+export function part_1(input: string): string {
+  const ranges = parseRanges(input);
+  console.log(`${ranges.map((r) => `${r.lo}-${r.hi}`).join("\n")}`);
+
+  // dumb and inefficient, but gets the right answer quickly enough
+  let sum = 0;
+  ranges.forEach((range) => {
+    for (let i = range.lo; i <= range.hi; i++) {
+      if (!valid(i)) sum += i;
+    }
+  });
+
+  return `${sum}`;
 }
 
 export function part_2(_input: string): string {
-  return ``;
+  return `PENDING`;
+}
+
+function parseRanges(input: string) {
+  return input.split(",").map((rangeInput: string) => {
+    const [lo, hi] = rangeInput.split("-").map((s) => Number.parseInt(s));
+    return { lo, hi };
+  });
+}
+
+function valid(value: number) {
+  const sValue = value.toString();
+  if (sValue.length % 2 == 1) return true;
+
+  const halfLength = sValue.length / 2;
+  if (sValue.slice(0, halfLength) === sValue.slice(halfLength)) return false;
+  return true;
 }

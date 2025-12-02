@@ -1,0 +1,5 @@
+{
+  "deno.enable": true,
+  "typescript.format.semicolons": "insert",
+  "editor.defaultFormatter": "denoland.vscode-deno"
+}
