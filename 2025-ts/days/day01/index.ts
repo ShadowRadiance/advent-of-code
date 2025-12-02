@@ -29,13 +29,7 @@
 // to open the door?
 
 export function part_1(input: string): string {
-  const lines = input.split("\n");
-
-  const instructions = lines.map((line) => {
-    const direction = line.charAt(0);
-    const amount = Number.parseInt(line.substring(1));
-    return { direction: direction, amount: amount };
-  });
+  const instructions = parseInstructions(input);
 
   let current = 50;
   let zeros = 0;
@@ -45,6 +39,62 @@ export function part_1(input: string): string {
     while (current < 0) current = current + 100;
     while (current > 99) current = current - 100;
     if (current === 0) zeros += 1;
+  });
+
+  return `${zeros}`;
+}
+
+// --- Part Two ---
+//
+// You're sure that's the right password, but the door won't open. You knock,
+// but nobody answers. You build a snowman while you think.
+//
+// As you're rolling the snowballs for your snowman, you find another security
+// document that must have fallen into the snow:
+//
+// "Due to newer security protocols, please use password method 0x434C49434B
+// until further notice."
+//
+// You remember from the training seminar that "method 0x434C49434B" means
+// you're actually supposed to count the number of times any click causes the
+// dial to point at 0, regardless of whether it happens during a rotation or
+// at the end of one.
+//
+// Be careful: if the dial were pointing at 50, a single rotation like R1000
+// would cause the dial to point at 0 ten times before returning back to 50!
+//
+// Using password method 0x434C49434B, what is the password to open the door?
+
+function parseInstructions(input: string) {
+  const lines = input.split("\n");
+
+  return lines.map((line) => {
+    const direction = line.charAt(0);
+    const amount = Number.parseInt(line.substring(1));
+    return { direction: direction, amount: amount };
+  });
+}
+
+function leftClick(current: number) {
+  if (current === 0) return 99;
+  return current - 1;
+}
+function rightClick(current: number) {
+  if (current === 99) return 0;
+  return current + 1;
+}
+
+export function part_2(input: string): string {
+  const instructions = parseInstructions(input);
+
+  let current = 50;
+  let zeros = 0;
+  instructions.forEach(({ direction, amount }) => {
+    const click = (direction === "L") ? leftClick : rightClick;
+    for (let i = 0; i < amount; i++) {
+      current = click(current);
+      if (current === 0) zeros++;
+    }
   });
 
   return `${zeros}`;
