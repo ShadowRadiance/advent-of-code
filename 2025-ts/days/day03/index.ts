@@ -51,6 +51,10 @@
  * possible from each bank; what is the total output joltage?
  */
 
+// "987654321111111" => 98
+// "811111111111119" => 89
+// "234234234234278" => 78
+// "818181911112111" => 92
 export function part_1(input: string): string {
   const lines = input.split("\n");
   const maximumJoltages = lines.map((line) => maximumJoltage(line));
@@ -98,28 +102,51 @@ export function part_1(input: string): string {
  * What is the new total output joltage?
  */
 
-export function part_2(_input: string): string {
-  return `PENDING`;
+// 987654321111111 => 987654321111
+// 811111111111119 => 811111111119
+// 234234234234278 => 434234234278
+// 818181911112111 => 888911112111
+
+export function part_2(input: string): string {
+  const lines = input.split("\n");
+  const maximumJoltages = lines.map((line) => maximumJoltage(line, 12));
+  const sum = maximumJoltages.reduce(reduce_adder, 0);
+  return `${sum}`;
 }
 
-// "987654321111111" => 98
-// "811111111111119" => 89
-// "234234234234278" => 78
-// "818181911112111" => 92
-function maximumJoltage(line: string): number {
+function maximumJoltage(line: string, count: number = 2): number {
   const chars = line.split("");
   const batteries = chars.map((char) => Number.parseInt(char));
+
+  return maximumJoltageForBatteries(batteries, count);
+}
+
+function maximumJoltageForBatteries(
+  batteries: number[],
+  count: number,
+): number {
+  if (count == 0) return 0;
+  if (count == 1) return Math.max(...batteries);
+
   const lastBatteryIndex = batteries.length - 1;
 
-  // if there's a way to make 9x, do so
-  // if there's a way to make 8x, do so
+  // if there's a way to make 9..., do so
+  // if there's a way to make 8..., do so
   // etc
   for (let first = 9; first >= 1; first--) {
     const firstInstanceOfFirst = batteries.indexOf(first);
-    if (firstInstanceOfFirst == -1) continue; // not found
-    if (firstInstanceOfFirst == lastBatteryIndex) continue; // no trailing
-    const second = Math.max(...batteries.slice(firstInstanceOfFirst + 1));
-    return first * 10 + second;
+    // not found
+    if (firstInstanceOfFirst == -1) continue;
+
+    // insuff trailing
+    if (lastBatteryIndex - firstInstanceOfFirst < count - 1) continue;
+
+    const rest = maximumJoltageForBatteries(
+      batteries.slice(firstInstanceOfFirst + 1),
+      count - 1,
+    );
+    const result = first * (Math.pow(10, count - 1)) + rest;
+    return result;
   }
 
   return 0;
