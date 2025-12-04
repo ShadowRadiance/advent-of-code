@@ -1,3 +1,7 @@
+import { Grid } from "../../lib/grid.ts";
+import { Direction } from "../../lib/direction.ts";
+import { Location } from "../../lib/location.ts";
+
 /** --- Day 4: Printing Department ---
  *
  * You ride the escalator down to the printing department. They're clearly
@@ -33,6 +37,7 @@
  * @.@@@.@@@@
  * .@@@@@@@@.
  * @.@.@@@.@.
+ *
  * The forklifts can only access a roll of paper if there are fewer than four
  * rolls of paper in the eight adjacent positions. If you can figure out which
  * rolls of paper the forklifts can access, they'll spend less time looking
@@ -56,8 +61,12 @@
  * of paper can be accessed by a forklift?
  */
 
-export function part_1(_input: string): string {
-  return `PENDING`;
+export function part_1(input: string): string {
+  // paperRoll accessible if 0-3 paperRolls adjacent (including diagonal)
+
+  const grid = gridFromString(input);
+  const grid2 = markGrid(grid);
+  return grid2.count("X").toString();
 }
 
 /** --- Part Two ---
@@ -65,4 +74,43 @@ export function part_1(_input: string): string {
 
 export function part_2(_input: string): string {
   return `PENDING`;
+}
+
+function gridFromString(s: string) {
+  return new Grid(s.split("\n").map((line) => chars(line)));
+}
+
+function chars(s: string) {
+  return s.split("");
+}
+
+function markGrid(grid: Grid<string>) {
+  return grid.mapCells((cell, rowIndex, colIndex) => {
+    if (cell === "@" && accessible(rowIndex, colIndex, grid)) return "X";
+    return cell;
+  });
+}
+
+function accessible(y: number, x: number, grid: Grid<string>): boolean {
+  // read surrounding elements, count rolls
+  const directions = [
+    new Direction(-1, -1),
+    new Direction(-1, 0),
+    new Direction(-1, 1),
+    new Direction(0, -1),
+    new Direction(0, 1),
+    new Direction(1, -1),
+    new Direction(1, 0),
+    new Direction(1, 1),
+  ];
+  const base = new Location(x, y);
+  const counter = (accumulator: number, dir: Direction) => {
+    const loc = base.add(dir);
+    const charAtLoc = grid.at(loc);
+    if (charAtLoc === "@") accumulator += 1; // nothing if off grid
+    return accumulator;
+  };
+  const count = directions.reduce(counter, 0);
+
+  return count <= 3;
 }
