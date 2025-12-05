@@ -22,5 +22,5 @@ Deno.test("part_1 returns the correct answer for the example", () => {
 });
 
 Deno.test("part_2 returns the correct answer for the example", () => {
-  assertEquals(part_2(data), "PENDING");
+  assertEquals(part_2(data), "14");
 });
