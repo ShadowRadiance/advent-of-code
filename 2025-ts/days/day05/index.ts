@@ -1,3 +1,5 @@
+import { Range } from "../../lib/range.ts";
+
 /**
  * --- Day 5: Cafeteria ---
  *
@@ -52,10 +54,6 @@
  * many of the available ingredient IDs are fresh?
  */
 
-interface Range {
-  lo: number;
-  hi: number;
-}
 interface Input {
   freshRanges: Range[];
   availableIngredients: number[];
@@ -67,7 +65,7 @@ function parseRangeLines(section: string): Range[] {
 
 function parseRangeLine(line: string): Range {
   const [lo, hi] = line.split("-");
-  return { lo: Number.parseInt(lo), hi: Number.parseInt(hi) };
+  return new Range(Number.parseInt(lo), Number.parseInt(hi));
 }
 
 function parseIngredientLines(section: string): number[] {
@@ -87,9 +85,7 @@ function parseInput(input: string): Input {
 }
 
 function ingredientIsFresh(id: number, ranges: Range[]) {
-  return undefined !== ranges.find(
-    (range) => (range.lo <= id && range.hi >= id),
-  );
+  return undefined !== ranges.find((range) => range.cover(id));
 }
 
 export function part_1(input: string): string {
@@ -141,6 +137,7 @@ export function part_2_bruteForce(input: string): string {
   state.freshRanges.forEach((range) => {
     for (let index = range.lo; index <= range.hi; index++) {
       set.add(index.toString());
+      // Set maximum size exceeded after 10s
     }
   });
 
@@ -150,14 +147,34 @@ export function part_2_bruteForce(input: string): string {
 export function part_2(input: string): string {
   const state = parseInput(input);
 
-  const set = new Set();
+  const ranges = collapse(state.freshRanges);
+  // sum (now-distinct) range sizes
+  const sum = ranges
+    .map((range) => range.size())
+    .reduce((acc, ct) => acc + ct);
 
-  state.freshRanges.forEach((range) => {
-    for (let index = range.lo; index <= range.hi; index++) {
-      set.add(index.toString());
-      // Set maximum size exceeded after 10s
+  return `${sum}`;
+}
+
+function collapse(ranges: Range[]): Range[] {
+  // sort by start (and then by end for same start)
+  ranges.sort((a, b) => a.lo === b.lo ? a.hi - b.hi : a.lo - b.lo);
+
+  // try to merge interval at each index into the interval at index -1
+  // -- merge == replace at index-1, remove at index
+  // if it merges, repeat without updating indices
+  // if it won't merge, move on to the next index
+  // break when index >= array length
+
+  let index = 1;
+  while (index < ranges.length) {
+    const collapsedPair = Range.collapse(ranges[index - 1], ranges[index]);
+    if (collapsedPair.length === 2) {
+      index++;
+    } else {
+      ranges.splice(index - 1, 2, ...collapsedPair);
     }
-  });
+  }
 
-  return `${set.size}`;
+  return ranges;
 }
