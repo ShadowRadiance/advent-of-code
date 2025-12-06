@@ -1,5 +1,5 @@
 import { ArgumentError } from "../../errors/argumentError.ts";
-import { lines } from "../../lib/parsing.ts";
+import { chars, lines, sections } from "../../lib/parsing.ts";
 
 /**
  * --- Day 6: Trash Compactor ---
@@ -53,8 +53,7 @@ import { lines } from "../../lib/parsing.ts";
  */
 
 export function part_1(input: string): string {
-  const re = /\s+/;
-  const inputMatrix = lines(input).map((line) => line.trim().split(re));
+  const inputMatrix = lines(input).map((line) => line.trim().split(/\s+/));
   const problems = transpose(inputMatrix);
   const solutions = problems.map((problem) => solve(problem));
   const checksum = solutions.reduce((acc, solution) => acc + solution);
@@ -72,6 +71,11 @@ export function part_1(input: string): string {
  * significant digit at the bottom. (Problems are still separated with a
  * column consisting only of spaces, and the symbol at the bottom of the
  * problem is still the operator to use.)
+ *
+ * 51  |
+ * 387 | ===> 532, 181, 75, *
+ * 215 |
+ * *   |
  *
  * Here's the example worksheet again:
  *
@@ -93,11 +97,40 @@ export function part_1(input: string): string {
  * found by adding together all of the answers to the individual problems?
  */
 
-export function part_2(_input: string): string {
-  return `PENDING`;
+export function part_2(input: string): string {
+  // read the bottom line first as the symbols show the alignment of the first
+  // character in each group
+  const inputLines = lines(input);
+  const operatorsLine = inputLines.pop() as string;
+  const operators = operatorsLine.split(/\s+/);
+
+  // make all the lines the same length as the longest line
+  const longest = inputLines.reduce((longestSoFar, current) => {
+    return (current.length > longestSoFar ? current.length : longestSoFar);
+  }, 0);
+  const fixedInputLines = inputLines.map((line) => {
+    return line + " ".repeat(longest - line.length);
+  });
+
+  const inputMatrix = fixedInputLines.map((line) => chars(line));
+  // console.log("inputMatrix", inputMatrix);
+  const flipped = transpose(inputMatrix);
+  // console.log("Flipped", flipped);
+  const recombined = flipped.map((arr) => arr.join("").trim()).join("\n");
+  // console.log("Recombined", recombined);
+  const problems = sections(recombined).map((section, idx) =>
+    lines(section).concat(operators[idx])
+  );
+
+  // handle problems as before
+  const solutions = problems.map((problem) => solve(problem));
+  const checksum = solutions.reduce((acc, solution) => acc + solution);
+  return `${checksum}`;
 }
 
 function transpose<T>(matrix: T[][]): T[][] {
+  // expects matrix to be square
+
   if (matrix.length === 0) return matrix;
 
   return matrix[0].map((_, idx) => matrix.map((row) => row[idx]));
