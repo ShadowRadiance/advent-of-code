@@ -1,0 +1,7 @@
+# Node/NPM
+node_modules/
+
+# AdventOfCode
+.aoc_cookie
+
+
