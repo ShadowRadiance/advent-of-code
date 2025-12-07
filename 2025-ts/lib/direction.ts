@@ -8,4 +8,8 @@ export class Direction extends Vector {
   override addXY(x: number, y: number): Direction {
     return new Direction(this.x + x, this.y + y);
   }
+
+  override toString(): string {
+    return `D(${this.x},${this.y})`;
+  }
 }

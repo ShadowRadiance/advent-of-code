@@ -14,4 +14,8 @@ export class Vector {
   addXY(x: number, y: number): Vector {
     return new Vector(this.x + x, this.y + y);
   }
+
+  toString(): string {
+    return `V(${this.x},${this.y})`;
+  }
 }

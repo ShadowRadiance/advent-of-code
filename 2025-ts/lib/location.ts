@@ -9,4 +9,8 @@ export class Location extends Vector {
   override addXY(x: number, y: number): Location {
     return new Location(this.x + x, this.y + y);
   }
+
+  override toString(): string {
+    return `L(${this.x},${this.y})`;
+  }
 }
