@@ -3,6 +3,10 @@ import { StopIteration } from "../errors/stopIteration.ts";
 import { Location } from "./location.ts";
 import { chars, lines } from "./parsing.ts";
 
+function isStringGrid(grid: unknown): grid is Grid<string> {
+  return (grid as Grid<string>) !== undefined;
+}
+
 export class Grid<T> {
   data: T[][];
 
@@ -87,15 +91,13 @@ export class Grid<T> {
     }
   }
 
-  representation() {
-    // deno-lint-ignore no-this-alias
-    const that = this;
-
-    if (isStringGrid(that)) {
-      return that.data.map((row) => row.join("")).join("\n");
+  representation(joiner?: string) {
+    if (joiner === undefined) {
+      if (isStringGrid(this)) joiner = "";
+      else joiner = ", ";
     }
 
-    return this.data.map((row) => row.join(", ")).join("\n");
+    return this.data.map((row) => row.join(joiner)).join("\n");
   }
 
   count(value: T) {
@@ -120,8 +122,4 @@ export class Grid<T> {
   static gridFromString(s: string) {
     return new Grid(lines(s).map((line) => chars(line)));
   }
-}
-
-function isStringGrid(grid: unknown): grid is Grid<string> {
-  return (grid as Grid<string>) !== undefined;
 }

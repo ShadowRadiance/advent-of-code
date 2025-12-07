@@ -1,6 +1,7 @@
 import { Grid } from "../../lib/grid.ts";
 import { Location } from "../../lib/location.ts";
 import { ObjectSet } from "../../lib/object_set.ts";
+import { chars } from "../../lib/parsing.ts";
 
 /** --- Day 7: Laboratories ---
  *
@@ -173,6 +174,26 @@ export function part_1(input: string): string {
   return `${splits}`;
 }
 
+function generateNextLine(
+  beams: ObjectSet<Location>,
+  grid: Grid<string>,
+  splits: number,
+): { beams: ObjectSet<Location>; splits: number } {
+  const newBeams = new ObjectSet<Location>();
+  for (const beam of beams) {
+    const newBeam = beam.addXY(0, 1);
+    if (grid.at(newBeam) === "^") {
+      newBeams.set(newBeam.addXY(-1, 0));
+      newBeams.set(newBeam.addXY(1, 0));
+      splits += 1;
+    } else {
+      newBeams.set(newBeam);
+    }
+  }
+
+  return { beams: newBeams, splits: splits };
+}
+
 /**
  * --- Part Two ---
  *
@@ -261,26 +282,61 @@ export function part_1(input: string): string {
  * tachyon particle end up on?
  */
 
-export function part_2(_input: string): string {
-  return `WAT`;
+function parseInput(s: string): (string | number)[][] {
+  return s.split("\n").map((line) => chars(line));
 }
 
-function generateNextLine(
-  beams: ObjectSet<Location>,
-  grid: Grid<string>,
-  splits: number,
-): { beams: ObjectSet<Location>; splits: number } {
-  const newBeams = new ObjectSet<Location>();
-  for (const beam of beams) {
-    const newBeam = beam.addXY(0, 1);
-    if (grid.at(newBeam) === "^") {
-      newBeams.set(newBeam.addXY(-1, 0));
-      newBeams.set(newBeam.addXY(1, 0));
-      splits += 1;
-    } else {
-      newBeams.set(newBeam);
+export function part_2(input: string): string {
+  const grid = new Grid<string | number>(parseInput(input));
+
+  const sLoc = grid.find("S");
+  for (let col = 0; col < grid.numCols(); col++) grid.setAtXY(col, 0, 0);
+  grid.setAt(sLoc!, 1);
+
+  for (let row = 1; row < grid.numRows(); row++) {
+    updateRow(grid, row, grid.numCols());
+    // console.log(grid.representation(" "));
+    // console.log("-".repeat(grid.numCols()));
+  }
+
+  let result = 0;
+  for (const entry of grid.row(grid.numRows() - 1)) {
+    result += entry as number;
+  }
+  return `${result}`;
+}
+
+/*
+ * focussing in:
+ * 000001020100000   ====  000001020100000
+ * .....^.^.^.....   ===>  000010303010000
+ *
+ * each . copies the number above it (anything but a number is 0)
+ * each ^ takes the number above it and adds it to each side, then becomes a zero
+ */
+
+function updateRow(
+  grid: Grid<string | number>,
+  row: number,
+  gridWidth: number,
+): void {
+  // handle the "."s
+  for (let col = 0; col < gridWidth; col++) {
+    if (grid.atXY(col, row) == ".") {
+      grid.setAtXY(col, row, grid.atXY(col, row - 1) as number);
     }
   }
 
-  return { beams: newBeams, splits: splits };
+  // handle the "^"s
+  for (let col = 0; col < gridWidth; col++) {
+    if (grid.atXY(col, row) == "^") {
+      const above = grid.atXY(col, row - 1) as number;
+      const left = grid.atXY(col - 1, row) as number;
+      const right = grid.atXY(col + 1, row) as number;
+
+      grid.setAtXY(col - 1, row, left + above);
+      grid.setAtXY(col + 1, row, right + above);
+      grid.setAtXY(col, row, 0);
+    }
+  }
 }
