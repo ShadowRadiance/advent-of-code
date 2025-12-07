@@ -7,6 +7,7 @@ import * as day03 from "./day03/index.ts";
 import * as day04 from "./day04/index.ts";
 import * as day05 from "./day05/index.ts";
 import * as day06 from "./day06/index.ts";
+import * as day07 from "./day07/index.ts";
 
 const dispatcher: ((data: string) => string)[][] = [
   [day01.part_1, day01.part_2],
@@ -15,6 +16,7 @@ const dispatcher: ((data: string) => string)[][] = [
   [day04.part_1, day04.part_2],
   [day05.part_1, day05.part_2],
   [day06.part_1, day06.part_2],
+  [day07.part_1, day07.part_2],
 ];
 
 function dualNumber(input: number): string {
