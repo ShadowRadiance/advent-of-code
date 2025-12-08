@@ -86,9 +86,113 @@
  * you multiply together the sizes of the three largest circuits?
  */
 
-export function part_1(_input: string): string {
-  return `PENDING`;
+import { lines } from "../../lib/parsing.ts";
+import { Vector3D } from "../../lib/vector.ts";
+
+function parseJunctionBox(s: string): Vector3D {
+  const [x, y, z] = s.split(",").map((s) => Number.parseInt(s));
+  return new Vector3D(x, y, z);
 }
+
+function parseJunctionBoxes(s: string): Vector3D[] {
+  return lines(s).map(parseJunctionBox);
+}
+
+interface Distance {
+  start: Vector3D;
+  finish: Vector3D;
+  length: number;
+}
+
+function generateDistances(junctionBoxes: Vector3D[]): Distance[] {
+  const distances: Distance[] = [];
+  for (let first = 0; first < junctionBoxes.length; first++) {
+    const jb1 = junctionBoxes[first];
+    for (let second = first + 1; second < junctionBoxes.length; second++) {
+      const jb2 = junctionBoxes[second];
+      distances.push({
+        start: jb1,
+        finish: jb2,
+        length: jb1.distance(jb2),
+      });
+    }
+  }
+  return distances;
+}
+
+function performConnections(
+  distances: Distance[],
+  numConnections: number,
+): Vector3D[][] {
+  const connectedGroups: Vector3D[][] = [];
+  const findConnectedGroupContaining = (jb: Vector3D) => {
+    return connectedGroups.find((group) => group.includes(jb)) ?? null;
+  };
+  for (let n = 0; n < numConnections; n++) {
+    const distance = distances.pop();
+    const groupForStart = findConnectedGroupContaining(distance!.start);
+    const groupForFinish = findConnectedGroupContaining(distance!.finish);
+
+    if (groupForStart !== null && groupForFinish !== null) {
+      if (groupForFinish !== groupForStart) {
+        groupForStart.push(...groupForFinish);
+        groupForFinish.splice(0); // leaves behind an empty array
+      }
+    }
+    if (groupForStart !== null && groupForFinish === null) {
+      groupForStart.push(distance!.finish);
+    }
+    if (groupForStart === null && groupForFinish !== null) {
+      groupForFinish.push(distance!.start);
+    }
+    if (groupForStart === null && groupForFinish === null) {
+      connectedGroups.push([distance!.start, distance!.finish]);
+    }
+  }
+  return connectedGroups;
+}
+
+export function part_1(input: string, test: boolean = false): string {
+  const junctionBoxes: Vector3D[] = parseJunctionBoxes(input);
+  const distances = generateDistances(junctionBoxes);
+  distances.sort((a, b) => a.length - b.length).reverse();
+
+  const numConnections = test ? 10 : 1000;
+  const connectedGroups: Vector3D[][] = performConnections(
+    distances,
+    numConnections,
+  );
+
+  connectedGroups.sort((groupA, groupB) => groupA.length - groupB.length);
+  const groupLengths = connectedGroups.map((group) => group.length);
+  groupLengths.sort((a, b) => b - a);
+  const topThreeGroupLengths = groupLengths.slice(0, 3);
+
+  let product = 1;
+  for (const groupLength of topThreeGroupLengths) product *= groupLength;
+
+  return `${product}`;
+}
+
+/**
+ * --- Part Two ---
+ *
+ * The Elves were right; they definitely don't have enough extension cables.
+ * You'll need to keep connecting junction boxes together until they're all in
+ * one large circuit.
+ *
+ * Continuing the above example, the first connection which causes all of the
+ * junction boxes to form a single circuit is between the junction boxes at
+ * 216,146,977 and 117,168,530. The Elves need to know how far those junction
+ * boxes are from the wall so they can pick the right extension cable;
+ * multiplying the X coordinates of those two junction boxes (216 and 117)
+ * produces 25272.
+ *
+ * Continue connecting the closest unconnected pairs of junction boxes
+ * together until they're all in the same circuit. What do you get if you
+ * multiply together the X coordinates of the last two junction boxes you
+ * need to connect?
+ */
 
 export function part_2(_input: string): string {
   return `PENDING`;
