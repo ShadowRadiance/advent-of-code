@@ -120,51 +120,80 @@ function generateDistances(junctionBoxes: Vector3D[]): Distance[] {
   return distances;
 }
 
+function findCircuitIndexWith(
+  jb: Vector3D,
+  circuits: Vector3D[][],
+): number | null {
+  const result = circuits.findIndex((group) => group.includes(jb));
+  return (result === -1) ? null : result;
+}
+
 function performConnections(
   distances: Distance[],
   numConnections: number,
 ): Vector3D[][] {
-  const connectedGroups: Vector3D[][] = [];
-  const findConnectedGroupContaining = (jb: Vector3D) => {
-    return connectedGroups.find((group) => group.includes(jb)) ?? null;
-  };
+  const circuits: Vector3D[][] = [];
   for (let n = 0; n < numConnections; n++) {
     const distance = distances.pop();
-    const groupForStart = findConnectedGroupContaining(distance!.start);
-    const groupForFinish = findConnectedGroupContaining(distance!.finish);
+    performConnection(distance!, circuits);
+  }
+  return circuits;
+}
 
-    if (groupForStart !== null && groupForFinish !== null) {
-      if (groupForFinish !== groupForStart) {
-        groupForStart.push(...groupForFinish);
-        groupForFinish.splice(0); // leaves behind an empty array
-      }
-    }
-    if (groupForStart !== null && groupForFinish === null) {
-      groupForStart.push(distance!.finish);
-    }
-    if (groupForStart === null && groupForFinish !== null) {
-      groupForFinish.push(distance!.start);
-    }
-    if (groupForStart === null && groupForFinish === null) {
-      connectedGroups.push([distance!.start, distance!.finish]);
+function performConnection(
+  distance: Distance,
+  circuits: Vector3D[][],
+): void {
+  const indexOfCircuitWithStart = findCircuitIndexWith(
+    distance.start,
+    circuits,
+  );
+  const indexOfCircuitWithFinish = findCircuitIndexWith(
+    distance.finish,
+    circuits,
+  );
+
+  // BOTH IN DIFFERENT CIRCUITS -- MERGE
+  if (indexOfCircuitWithStart !== null && indexOfCircuitWithFinish !== null) {
+    if (indexOfCircuitWithFinish !== indexOfCircuitWithStart) {
+      circuits[indexOfCircuitWithStart].push(
+        ...circuits[indexOfCircuitWithFinish],
+      );
+      removeAt(circuits, indexOfCircuitWithFinish);
     }
   }
-  return connectedGroups;
+  // ONLY ONE IN A CIRCUIT (ADD THE OTHER TO THE FIRST'S CIRCUIT)
+  if (indexOfCircuitWithStart !== null && indexOfCircuitWithFinish === null) {
+    circuits[indexOfCircuitWithStart].push(distance.finish);
+  }
+  if (indexOfCircuitWithStart === null && indexOfCircuitWithFinish !== null) {
+    circuits[indexOfCircuitWithFinish].push(distance.start);
+  }
+
+  // NEITHER IN A CIRCUIT -- ADD BOTH TO NEW CIRCUIT
+  if (indexOfCircuitWithStart === null && indexOfCircuitWithFinish === null) {
+    circuits.push([distance.start, distance.finish]);
+  }
+}
+
+function removeAt<T>(arr: Array<T>, at: number): void {
+  [arr[at], arr[arr.length - 1]] = [arr[arr.length - 1], arr[at]];
+  arr.pop();
 }
 
 export function part_1(input: string, test: boolean = false): string {
   const junctionBoxes: Vector3D[] = parseJunctionBoxes(input);
   const distances = generateDistances(junctionBoxes);
-  distances.sort((a, b) => a.length - b.length).reverse();
+  distances.sort((a, b) => b.length - a.length);
 
   const numConnections = test ? 10 : 1000;
-  const connectedGroups: Vector3D[][] = performConnections(
+  const circuits: Vector3D[][] = performConnections(
     distances,
     numConnections,
   );
 
-  connectedGroups.sort((groupA, groupB) => groupA.length - groupB.length);
-  const groupLengths = connectedGroups.map((group) => group.length);
+  circuits.sort((groupA, groupB) => groupA.length - groupB.length);
+  const groupLengths = circuits.map((group) => group.length);
   groupLengths.sort((a, b) => b - a);
   const topThreeGroupLengths = groupLengths.slice(0, 3);
 
@@ -194,6 +223,19 @@ export function part_1(input: string, test: boolean = false): string {
  * need to connect?
  */
 
-export function part_2(_input: string): string {
-  return `PENDING`;
+export function part_2(input: string): string {
+  const junctionBoxes: Vector3D[] = parseJunctionBoxes(input);
+  const distances = generateDistances(junctionBoxes);
+  distances.sort((a, b) => a.length - b.length);
+
+  const circuits: Vector3D[][] = [];
+  for (const distance of distances) {
+    performConnection(distance, circuits);
+
+    if (circuits[0].length === junctionBoxes.length) {
+      return (distance.start.x * distance.finish.x).toString();
+    }
+  }
+
+  return `OOPS`;
 }
