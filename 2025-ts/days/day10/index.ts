@@ -85,7 +85,12 @@
  */
 
 import { lines } from "../../lib/parsing.ts";
-import { Machine, parseMachine, solveMachinePart1 } from "./machine.ts";
+import {
+  Machine,
+  parseMachine,
+  solveMachinePart1,
+  solveMachinePart2,
+} from "./machine.ts";
 
 export function parseInput(s: string): Machine[] {
   return lines(s).map(parseMachine);
@@ -161,6 +166,12 @@ export function part_1(input: string): string {
  * What is the fewest button presses required to correctly configure the
  * joltage level counters on all of the machines?
  */
-export function part_2(_input: string): string {
-  return `PENDING`;
+export function part_2(input: string): string {
+  const machines = parseInput(input);
+
+  let sum = 0;
+  for (const machine of machines) {
+    sum += solveMachinePart2(machine);
+  }
+  return sum.toString();
 }
