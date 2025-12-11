@@ -1,5 +1,10 @@
 import { ArgumentError } from "../../errors/argumentError.ts";
 import { chars, lines, sections } from "../../lib/parsing.ts";
+import {
+  reduce_add,
+  reduce_max,
+  reduce_mul,
+} from "../../lib/reduce_helpers.ts";
 
 /**
  * --- Day 6: Trash Compactor ---
@@ -56,7 +61,7 @@ export function part_1(input: string): string {
   const inputMatrix = lines(input).map((line) => line.trim().split(/\s+/));
   const problems = transpose(inputMatrix);
   const solutions = problems.map((problem) => solve(problem));
-  const checksum = solutions.reduce((acc, solution) => acc + solution);
+  const checksum = solutions.reduce(reduce_add);
   return `${checksum}`;
 }
 
@@ -105,9 +110,7 @@ export function part_2(input: string): string {
   const operators = operatorsLine.split(/\s+/);
 
   // make all the lines the same length as the longest line
-  const longest = inputLines.reduce((longestSoFar, current) => {
-    return (current.length > longestSoFar ? current.length : longestSoFar);
-  }, 0);
+  const longest = inputLines.map((line) => line.length).reduce(reduce_max);
   const fixedInputLines = inputLines.map((line) => {
     return line + " ".repeat(longest - line.length);
   });
@@ -124,7 +127,7 @@ export function part_2(input: string): string {
 
   // handle problems as before
   const solutions = problems.map((problem) => solve(problem));
-  const checksum = solutions.reduce((acc, solution) => acc + solution);
+  const checksum = solutions.reduce(reduce_add);
   return `${checksum}`;
 }
 
@@ -149,9 +152,9 @@ function solve(problem: string[]): number {
 function operatorFn(operator: string): (acc: number, item: number) => number {
   switch (operator) {
     case "+":
-      return (acc, item) => acc + item;
+      return reduce_add;
     case "*":
-      return (acc, item) => acc * item;
+      return reduce_mul;
     default:
       throw new ArgumentError(
         `operator must be '+' or '*', given '${operator}'`,

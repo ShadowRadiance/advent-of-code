@@ -1,4 +1,5 @@
 import { Range } from "../../lib/range.ts";
+import { reduce_add } from "../../lib/reduce_helpers.ts";
 
 /**
  * --- Day 5: Cafeteria ---
@@ -151,7 +152,7 @@ export function part_2(input: string): string {
   // sum (now-distinct) range sizes
   const sum = ranges
     .map((range) => range.size())
-    .reduce((acc, ct) => acc + ct);
+    .reduce(reduce_add);
 
   return `${sum}`;
 }

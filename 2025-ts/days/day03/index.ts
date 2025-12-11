@@ -51,6 +51,8 @@
  * possible from each bank; what is the total output joltage?
  */
 
+import { reduce_add } from "../../lib/reduce_helpers.ts";
+
 // "987654321111111" => 98
 // "811111111111119" => 89
 // "234234234234278" => 78
@@ -58,7 +60,7 @@
 export function part_1(input: string): string {
   const lines = input.split("\n");
   const maximumJoltages = lines.map((line) => maximumJoltage(line));
-  const sum = maximumJoltages.reduce(reduce_adder, 0);
+  const sum = maximumJoltages.reduce(reduce_add);
   return `${sum}`;
 }
 
@@ -110,7 +112,7 @@ export function part_1(input: string): string {
 export function part_2(input: string): string {
   const lines = input.split("\n");
   const maximumJoltages = lines.map((line) => maximumJoltage(line, 12));
-  const sum = maximumJoltages.reduce(reduce_adder, 0);
+  const sum = maximumJoltages.reduce(reduce_add);
   return `${sum}`;
 }
 
@@ -150,8 +152,4 @@ function maximumJoltageForBatteries(
   }
 
   return 0;
-}
-
-function reduce_adder(accumulator: number, current: number) {
-  return accumulator + current;
 }

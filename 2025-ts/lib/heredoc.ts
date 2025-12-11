@@ -1,3 +1,5 @@
+import { reduce_min } from "./reduce_helpers.ts";
+
 const ALL_SPACES: RegExp = /^\s*$/;
 const PREFIX_SPACES = /^ +/;
 const PREFIX_TABS = /^\t+/;
@@ -25,20 +27,12 @@ export function heredoc(s: string): string {
 function longestCommonPrefix(lines: string[], prefixChar: string): string {
   const matcher = prefixChar === " " ? PREFIX_SPACES : PREFIX_TABS;
 
-  const reducer = (
-    smallest: number,
-    line: string,
-    _idx: number,
-    _arr: string[],
-  ) => {
-    const matches = line.match(matcher);
-    if (matches === null) return smallest;
-    const len = matches[0].length;
-    return len >= smallest ? smallest : len;
-  };
-  const smallest = lines.reduce(reducer, Infinity);
-
-  return " ".repeat(smallest);
+  return " ".repeat(
+    lines.map((line) => {
+      const matches = line.match(matcher);
+      return matches?.at(0)?.length ?? 0;
+    }).reduce(reduce_min),
+  );
 }
 
 function stripPrefix(prefix: string, s: string): string {
