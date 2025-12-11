@@ -108,7 +108,7 @@ export function solveMachinePart2(machine: Machine): number {
 
   // A.x = B
 
-  console.log(machine);
+  // console.log(machine);
 
   const numberOfEquations = machine.joltageRequirements.length;
   const numberOfUnknowns = machine.buttonSchematics.length;
@@ -133,18 +133,12 @@ export function solveMachinePart2(machine: Machine): number {
     matrixB[i] = [machine.joltageRequirements[i]];
   }
 
-  console.log("A", matrixA);
-  console.log("X", matrixX);
-  console.log("B", matrixB);
-  console.log("A.x = B");
-
   return 0;
 }
 
 function affectsSlot(slot: number, paddedButton: string): boolean {
-  // button: 1001
-  //                                       1001
-  // if i is 2 we want to check for a 1 here ^
+  // button:                                  1001
+  // if i is 2 we want to check for a 1 here: 01^3
 
   return (paddedButton[slot] === "1");
 }

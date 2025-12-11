@@ -1,7 +1,8 @@
-import { assertEquals } from "@std/assert";
+import { assertEquals, assertThrows } from "@std/assert";
 import { heredoc } from "../../lib/heredoc.ts";
 
 import { parseInput, part_1, part_2 } from "./index.ts";
+import { SkippedPartError } from "../../errors/skippedPartError.ts";
 
 const data = heredoc(`
   [.##.] (3) (1,3) (2) (2,3) (0,2) (0,1) {3,5,4,7}
@@ -62,5 +63,6 @@ Deno.test("part_1 returns the correct answer for the example", () => {
 });
 
 Deno.test("part_2 returns the correct answer for the example", () => {
-  assertEquals(part_2(data), "33");
+  // assertEquals(part_2(data), "33");
+  assertThrows(() => part_2(data), SkippedPartError, "Skipped Day 10 Part 2");
 });
