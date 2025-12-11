@@ -21,5 +21,21 @@ Deno.test("part_1 returns the correct answer for the example", () => {
 });
 
 Deno.test("part_2 returns the correct answer for the example", () => {
-  assertEquals(part_2(data), "PENDING");
+  const testing = true;
+  const data = heredoc(`
+    svr: aaa bbb
+    aaa: fft
+    fft: ccc
+    bbb: tty
+    tty: ccc
+    ccc: ddd eee
+    ddd: hub
+    hub: fff
+    eee: dac
+    dac: fff
+    fff: ggg hhh
+    ggg: out
+    hhh: out
+  `);
+  assertEquals(part_2(data, testing), "2");
 });

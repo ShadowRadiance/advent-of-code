@@ -57,12 +57,133 @@
  * In total, there are 5 different paths leading from you to out.
  *
  * How many different paths lead from you to out?
+ *
+ * --- Part Two ---
+ *
+ * Thanks in part to your analysis, the Elves have figured out a little bit
+ * about the issue. They now know that the problematic data path passes through
+ * both dac (a digital-to-analog converter) and fft (a device which performs a
+ * fast Fourier transform).
+ *
+ * They're still not sure which specific path is the problem, and so they now
+ * need you to find every path from svr (the server rack) to out. However, the
+ * paths you find must all also visit both dac and fft (in any order).
+ *
+ * For example:
+ *
+ * svr: aaa bbb
+ * aaa: fft
+ * fft: ccc
+ * bbb: tty
+ * tty: ccc
+ * ccc: ddd eee
+ * ddd: hub
+ * hub: fff
+ * eee: dac
+ * dac: fff
+ * fff: ggg hhh
+ * ggg: out
+ * hhh: out
+ *
+ * This new list of devices contains many paths from svr to out:
+ *
+ * svr,aaa,fft,ccc,ddd,hub,fff,ggg,out
+ * svr,aaa,fft,ccc,ddd,hub,fff,hhh,out
+ * svr,aaa,fft,ccc,eee,dac,fff,ggg,out
+ * svr,aaa,fft,ccc,eee,dac,fff,hhh,out
+ * svr,bbb,tty,ccc,ddd,hub,fff,ggg,out
+ * svr,bbb,tty,ccc,ddd,hub,fff,hhh,out
+ * svr,bbb,tty,ccc,eee,dac,fff,ggg,out
+ * svr,bbb,tty,ccc,eee,dac,fff,hhh,out
+ *
+ * However, only 2 paths from svr to out visit both dac and fft.
+ *
+ * Find all of the paths that lead from svr to out. How many of those paths
+ * visit both dac and fft?
  */
 
-export function part_1(_input: string): string {
-  return "PENDING";
+import { lines } from "../../lib/parsing.ts";
+import { reduce_add } from "../../lib/reduce_helpers.ts";
+
+interface Device {
+  name: string;
+  outputs: string[];
+}
+type DeviceMap = Map<string, Device>;
+
+class System {
+  deviceMap: DeviceMap;
+  prebuiltPathCounts = new Map<
+    /*from:*/ string,
+    Map</*to:*/ string, /*count*/ number>
+  >();
+
+  constructor(input: string) {
+    this.deviceMap = new Map<string, Device>();
+    this.parseDevices(input);
+  }
+
+  parseDevices(s: string) {
+    lines(s).forEach((line) => {
+      const device = this.parseDevice(line);
+
+      this.deviceMap.set(device.name, device);
+
+      for (const other of device.outputs) {
+        if (!this.deviceMap.has(other)) {
+          this.deviceMap.set(other, { name: other, outputs: [] });
+        }
+      }
+    });
+  }
+
+  parseDevice(s: string): Device {
+    const [name, outputStr] = s.split(": ");
+    const outputs = outputStr.split(" ");
+
+    return {
+      name,
+      outputs,
+    };
+  }
+
+  ensureMapExists(from: string): Map<string, number> {
+    if (this.prebuiltPathCounts.get(from) === undefined) {
+      this.prebuiltPathCounts.set(from, new Map<string, number>());
+    }
+    return this.prebuiltPathCounts.get(from)!;
+  }
+
+  countPaths(from: string, to: string): number {
+    const fromMap = this.ensureMapExists(from);
+
+    let count = fromMap.get(to);
+    if (count !== undefined) return count;
+
+    if (from === to) return 1;
+
+    const device = this.deviceMap.get(from)!;
+    if (device.outputs.length === 0) return 0;
+
+    count = device.outputs
+      .map((name) => this.countPaths(name, to))
+      .reduce(reduce_add);
+    fromMap.set(to, count);
+    return count;
+  }
 }
 
-export function part_2(_input: string): string {
-  return "PENDING";
+export function part_1(input: string): string {
+  const system = new System(input);
+  const count = system.countPaths("you", "out");
+  return count.toString();
+}
+
+export function part_2(input: string, _test: boolean = false): string {
+  const system = new System(input);
+  let result = 1;
+  result *= system.countPaths("svr", "fft");
+  result *= system.countPaths("fft", "dac");
+  result *= system.countPaths("dac", "out");
+  return result.toString();
 }
