@@ -84,14 +84,9 @@
  * indicator lights on all of the machines?
  */
 
-import { SkippedPartError } from "../../errors/skippedPartError.ts";
 import { lines } from "../../lib/parsing.ts";
-import {
-  Machine,
-  parseMachine,
-  solveMachinePart1,
-  solveMachinePart2,
-} from "./machine.ts";
+import { Machine, parseMachine } from "./machine.ts";
+import { solveMachinePart1, solveMachinePart2 } from "./solution.ts";
 
 export function parseInput(s: string): Machine[] {
   return lines(s).map(parseMachine);
@@ -174,6 +169,6 @@ export function part_2(input: string): string {
   for (const machine of machines) {
     sum += solveMachinePart2(machine);
   }
-  throw new SkippedPartError(10, 2);
-  // return sum.toString();
+  // throw new SkippedPartError(10, 2);
+  return sum.toString();
 }

@@ -17,6 +17,14 @@ Deno.test("parseInput parses the input into the correct structure", () => {
       size: 4,
       desiredIndicatorLights: parseInt("0110", 2),
       buttonSchematics: [
+        [3],
+        [1, 3],
+        [2],
+        [2, 3],
+        [0, 2],
+        [0, 1],
+      ],
+      buttonBinaries: [
         parseInt("0001", 2), // (3)
         parseInt("0101", 2), // (1,3)
         parseInt("0010", 2), // (2)
@@ -31,6 +39,13 @@ Deno.test("parseInput parses the input into the correct structure", () => {
       size: 5,
       desiredIndicatorLights: parseInt("00010", 2),
       buttonSchematics: [
+        [0, 2, 3, 4],
+        [2, 3],
+        [0, 4],
+        [0, 1, 2],
+        [1, 2, 3, 4],
+      ],
+      buttonBinaries: [
         parseInt("10111", 2), // (0,2,3,4),
         parseInt("00110", 2), // (2,3),
         parseInt("10001", 2), // (0,4),
@@ -44,6 +59,12 @@ Deno.test("parseInput parses the input into the correct structure", () => {
       size: 6,
       desiredIndicatorLights: parseInt("011101", 2),
       buttonSchematics: [
+        [0, 1, 2, 3, 4],
+        [0, 3, 4],
+        [0, 1, 2, 4, 5],
+        [1, 2],
+      ],
+      buttonBinaries: [
         parseInt("111110", 2), // (0,1,2,3,4),
         parseInt("100110", 2), // (0,3,4),
         parseInt("111011", 2), // (0,1,2,4,5),
@@ -63,6 +84,5 @@ Deno.test("part_1 returns the correct answer for the example", () => {
 });
 
 Deno.test("part_2 returns the correct answer for the example", () => {
-  // assertEquals(part_2(data), "33");
-  assertThrows(() => part_2(data), SkippedPartError, "Skipped Day 10 Part 2");
+  assertEquals(part_2(data), "33");
 });
