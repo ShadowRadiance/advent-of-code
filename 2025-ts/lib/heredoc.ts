@@ -29,6 +29,7 @@ function longestCommonPrefix(lines: string[], prefixChar: string): string {
 
   return " ".repeat(
     lines.map((line) => {
+      if (ALL_SPACES.test(line)) return Infinity;
       const matches = line.match(matcher);
       return matches?.at(0)?.length ?? 0;
     }).reduce(reduce_min),
