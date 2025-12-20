@@ -2,49 +2,19 @@
 // - the current state can be modelled as an integer of size 2^numLights bits
 // - the button can be modelled as an XOR of the current state with a number
 
+import { reduce_min } from "../../lib/reduce_helpers.ts";
 import { solveMachinePart2_withBifurcation } from "./bifurcation_solution.ts";
+import { BinaryParitySolver } from "./binary_parity_solver.ts";
 import { solveMachinePart2_withGaussianElimination } from "./linear_system_solution.ts";
 import { Machine } from "./machine.ts";
 
 export function solveMachinePart1(machine: Machine): number {
   // return the smallest number of buttons to push to make lights -> desired
 
-  // since each button performs "current XOR button" pressing multiple times
-  // is unnecessary each is pressed 0 or 1 times.
-
-  const variations = Math.pow(2, machine.buttons.length);
-
-  let lowestButtonCountThatWorks = Infinity;
-
-  for (let variation = 0; variation < variations; variation++) {
-    if (variation === 0) continue; // the target is never "all off"
-    const buttons = buttonsForVariation(variation, machine);
-    if (buttons.length >= lowestButtonCountThatWorks) continue;
-    if (testButtons(buttons, machine)) {
-      lowestButtonCountThatWorks = buttons.length;
-    }
-  }
-
-  return lowestButtonCountThatWorks;
-}
-
-function testButtons(buttons: number[], machine: Machine): boolean {
-  // reset machine
-  let lights = 0;
-  // push the buttons
-  for (const button of buttons) lights ^= button;
-  // does it get the right lights?
-  return lights === machine.lightPatternBinary;
-}
-
-function buttonsForVariation(variation: number, machine: Machine): number[] {
-  const buttons = [];
-  for (let btnIdx = 0; btnIdx < machine.buttons.length; btnIdx++) {
-    if ((Math.pow(2, btnIdx) & variation) !== 0) {
-      buttons.push(machine.buttons[btnIdx].binary);
-    }
-  }
-  return buttons;
+  const bps = new BinaryParitySolver(machine.size, machine.buttons);
+  return bps.parityMap.get(machine.lightPattern)!
+    .map((c) => c.length)
+    .reduce(reduce_min);
 }
 
 export function solveMachinePart2(machine: Machine): number {
