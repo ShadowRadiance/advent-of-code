@@ -3,16 +3,9 @@
 
 import { Grid } from "../../lib/grid.ts";
 import { reduce_add } from "../../lib/reduce_helpers.ts";
+import { Machine } from "./machine.ts";
 
 const EPSILON = 1e-9;
-
-interface Machine {
-  size: number;
-  desiredIndicatorLights: number;
-  buttonBinaries: number[];
-  buttonSchematics: number[][];
-  joltageRequirements: number[];
-}
 
 export function solveMachinePart2_withGaussianElimination(
   machine: Machine,
@@ -89,13 +82,13 @@ class MatrixInfo {
 
   static fromMachine(machine: Machine): MatrixInfo {
     const eqns = machine.joltageRequirements.length;
-    const unks = machine.buttonSchematics.length;
+    const unks = machine.buttons.length;
     const data = Array.from(
       { length: eqns },
       () => Array.from({ length: unks + 1 }, () => (0)),
     );
-    machine.buttonSchematics.forEach((schematic, btnIdx) => {
-      schematic.forEach((connectedCounterIdx) => {
+    machine.buttons.forEach((button, btnIdx) => {
+      button.schema.forEach((connectedCounterIdx) => {
         if (connectedCounterIdx < eqns) data[connectedCounterIdx][btnIdx] = 1.0;
       });
     });

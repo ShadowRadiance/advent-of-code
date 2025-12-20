@@ -85,11 +85,11 @@
  */
 
 import { lines } from "../../lib/parsing.ts";
-import { Machine, parseMachine } from "./machine.ts";
+import { Machine } from "./machine.ts";
 import { solveMachinePart1, solveMachinePart2 } from "./solution.ts";
 
 export function parseInput(s: string): Machine[] {
-  return lines(s).map(parseMachine);
+  return lines(s).map((s) => new Machine(s));
 }
 
 export function part_1(input: string): string {

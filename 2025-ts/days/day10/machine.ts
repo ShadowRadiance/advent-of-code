@@ -1,44 +1,34 @@
-import { chars } from "../../lib/parsing.ts";
+import { Button } from "./button.ts";
 
-export interface Machine {
-  size: number;
-  desiredIndicatorLights: number;
-  buttonBinaries: number[];
-  buttonSchematics: number[][];
+export class Machine {
+  static LINE_REGEXP = /\[(.*)\] \((.*)\) \{(.*)\}/;
+
+  lightPattern: string;
+  buttons: Button[];
   joltageRequirements: number[];
-}
+  originalLine: string;
 
-export function parseMachine(s: string): Machine {
-  const results = LINE_REGEXP.exec(s)!;
-  const size = results[1].length;
+  constructor(line: string) {
+    this.originalLine = line;
 
-  const desiredIndicatorLights = indicatorLights(results[1]);
-  const buttonSchematics = results[2].split(") (")
-    .map((s) => s.split(",").map((s) => parseInt(s)));
-  const buttonBinaries = results[2].split(") (")
-    .map((s) => buttonBinary(s, size));
-  const joltageRequirements = results[3].split(",")
-    .map((s) => parseInt(s));
+    const results = Machine.LINE_REGEXP.exec(line)!;
+    this.lightPattern = results[1];
+    this.buttons = results[2]
+      .split(") (")
+      .map((s, ix) => Button.parseButton(`B${ix}`, s, this.size));
+    this.joltageRequirements = results[3]
+      .split(",")
+      .map((s) => parseInt(s));
+  }
 
-  return {
-    size,
-    desiredIndicatorLights,
-    buttonSchematics,
-    buttonBinaries,
-    joltageRequirements,
-  };
-}
+  get size() {
+    return this.lightPattern.length;
+  }
 
-const LINE_REGEXP = /\[(.*)\] \((.*)\) \{(.*)\}/;
-
-function indicatorLights(s: string): number {
-  return parseInt(s.replaceAll(".", "0").replaceAll("#", "1"), 2);
-}
-
-function buttonBinary(s: string, len: number): number {
-  // 2,3 => "0".repeat(len).setAt(2,"1").setAt(3,"1")
-  const base = chars("0".repeat(len));
-  const indices = s.split(",").map((s) => parseInt(s));
-  for (const index of indices) base[index] = "1";
-  return parseInt(base.join(""), 2);
+  get lightPatternBinary(): number {
+    return parseInt(
+      this.lightPattern.replaceAll(".", "0").replaceAll("#", "1"),
+      2,
+    );
+  }
 }
