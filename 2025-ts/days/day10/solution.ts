@@ -28,7 +28,13 @@ export function solveMachinePart2(machine: Machine): number {
   // console.log(`[${machine.joltageRequirements.join(",")}] => ${result1}`);
 
   const result2 = solveMachinePart2_withBifurcation(machine);
-  if (result1 !== result2) console.log("Incorrect");
+  // 19293 in 0.340s
+
+  if (result1 !== result2) {
+    console.log(`Incorrect: ${result2} should be ${result1}`);
+  } else {
+    console.log(`CORRECT!!: ${result2} should be ${result1}`);
+  }
   return result2;
 }
 
