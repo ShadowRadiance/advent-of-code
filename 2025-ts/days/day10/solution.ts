@@ -2,6 +2,7 @@
 // - the current state can be modelled as an integer of size 2^numLights bits
 // - the button can be modelled as an XOR of the current state with a number
 
+import { solveMachinePart2_withBifurcation } from "./bifurcation_solution.ts";
 import { solveMachinePart2_withGaussianElimination } from "./linear_system_solution.ts";
 import { Machine } from "./machine.ts";
 
@@ -11,7 +12,7 @@ export function solveMachinePart1(machine: Machine): number {
   // since each button performs "current XOR button" pressing multiple times
   // is unnecessary each is pressed 0 or 1 times.
 
-  const variations = Math.pow(2, machine.buttonBinaries.length);
+  const variations = Math.pow(2, machine.buttons.length);
 
   let lowestButtonCountThatWorks = Infinity;
 
@@ -33,14 +34,14 @@ function testButtons(buttons: number[], machine: Machine): boolean {
   // push the buttons
   for (const button of buttons) lights ^= button;
   // does it get the right lights?
-  return lights === machine.desiredIndicatorLights;
+  return lights === machine.lightPatternBinary;
 }
 
 function buttonsForVariation(variation: number, machine: Machine): number[] {
   const buttons = [];
-  for (let btnIdx = 0; btnIdx < machine.buttonBinaries.length; btnIdx++) {
+  for (let btnIdx = 0; btnIdx < machine.buttons.length; btnIdx++) {
     if ((Math.pow(2, btnIdx) & variation) !== 0) {
-      buttons.push(machine.buttonBinaries[btnIdx]);
+      buttons.push(machine.buttons[btnIdx].binary);
     }
   }
   return buttons;
@@ -51,21 +52,15 @@ export function solveMachinePart2(machine: Machine): number {
   // return the smallest number of buttons to push to make joltage -> required
   // (without going over)
 
-  return solveMachinePart2_withGaussianElimination(machine);
+  const result1 = solveMachinePart2_withGaussianElimination(machine);
   // 19293 in 0.603s
 
-  // return solveMachinePart2_withBifurcation(machine);
+  // console.log(`[${machine.joltageRequirements.join(",")}] => ${result1}`);
+
+  const result2 = solveMachinePart2_withBifurcation(machine);
+  if (result1 !== result2) console.log("Incorrect");
+  return result2;
 }
-
-function solveMachinePart2_withBifurcation(machine: Machine): number {
-  // https://www.reddit.com/r/adventofcode/comments/1pk87hl/
-  // @tenthmascot
-  return 0;
-}
-
-//----- START BIFURCATION -----//
-
-//----- END BIFURCATION -----//
 
 function _zip<T>(xyz: T[], abc: T[]): T[][] {
   return xyz.map((item, idx) => [item, abc[idx]]);
